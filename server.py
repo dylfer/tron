@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, render_template
 # join_room, leave_room, close_room, rooms, disconnect
 from flask_socketio import SocketIO, emit
 import json
+import os
 
 
 app = Flask(__name__,
