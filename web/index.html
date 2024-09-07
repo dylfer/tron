@@ -10,7 +10,98 @@
     <!-- <link href="stlye.css" rel="stylesheet" type="text/css" /> -->
   </head>
   <body>
+    <div id="menu">
+      <h1>Tron</h1>
+      <h2>local</h2>
+      <button id="start">1 player</button>
+      <button id="restart">2 player</button>
+      <h2>online</h2>
+      <button id="pause">2 playera</button>
+      <button id="resume">max 4 player</button>
+      <h2>private game</h2>
+      <button id="end">create lobby</button>
+      <button id="end">join lobby</button>
+    </div>
+    <div id="lobby">
+      <!-- sent by server when requested  -->
+      <div id="join">
+        <!-- onboarding -->
+        <h1>join lobby</h1>
+        <input type="text" id="code" placeholder="code" />
+        <button id="loby-join">continue</button>
+      </div>
+      <div id="name">
+        <!-- account in futre -->
+        <h1>create lobby</h1>
+        <input type="text" id="name" placeholder="name" />
+        <button id="lobby-name">join</button>
+      </div>
+
+      <div id="joined">
+        <!-- player view-->
+        <h1>lobby</h1>
+        <h2>code</h2>
+        <div id="code">....</div>
+        <h2>players</h2>
+        <div id="players">
+          <div id="player">
+            <p>player 1</p>
+          </div>
+          <div id="player">
+            <p>player 2</p>
+          </div>
+          <div id="player">
+            <p>player 3</p>
+          </div>
+          <div id="player">
+            <p>player 4</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="joined">
+        <!-- creator voew -->
+        <h1>lobby</h1>
+        <h2>code</h2>
+        <div id="code">....</div>
+        <button id="lock">lock icon/unlock icon</button>
+        <h2>players</h2>
+        <div id="players">
+          <div id="player1">
+            <p>player 1</p>
+          </div>
+          <div id="player2">
+            <p>player 2</p>
+          </div>
+          <div id="player3">
+            <p>player 3</p>
+          </div>
+          <div id="player4">
+            <p>player 4</p>
+          </div>
+        </div>
+        <settings id="settings-btn"></settings>
+        <button id="start">start</button>
+      </div>
+      <div id="settings">
+        <h1>settings</h1>
+        <h2>max players</h2>
+        <input type="range" id="size" min="2" max="20" />
+        <h2>speed</h2>
+        <input type="range" id="speed" min="1" max="10" />
+        <h2>trail/wall length</h2>
+        <input type="range" id="trail" min="1" max="30" />
+        <h2>color</h2>
+        <input type="color" id="color" />
+        <label for="rgb">rgb</label>
+        <input type="checkbox" id="rgb" />
+
+        <button id="save">save</button>
+      </div>
+    </div>
     <canvas id="game"> </canvas>
+    <div id="end"></div>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <script src="script.js"></script>
   </body>
 </html>
