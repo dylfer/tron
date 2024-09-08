@@ -10,10 +10,32 @@ let trail2 = [];
 let cords1 = { x: 10, y: 50 }; // sent by server
 let cords2 = { x: 90, y: 50 };
 let lastUpdate = Date.now();
+let socket;
+let conected = false;
+let disconected = false;
+let lobby_creator = false;
+
+///////////////
+
+let lobby_hidden = true;
 let menu;
 let lobby;
 let game;
 let end;
+let code_join_section;
+let lobby_name_section;
+let lobby_joined_section;
+let join_code;
+let username;
+
+///////////////
+
+let lobby_max_players;
+let lobby_rounds;
+let lobby_speed;
+let lobby_trail;
+let lobby_color;
+let lobby_rgb;
 
 ///////////////
 
@@ -47,8 +69,8 @@ function setScreen(screen) {
   stage = screen;
 }
 
-function start() {
-  // start using sockets
+function start(players) {
+  // start sockets coms
 }
 
 function end() {}
@@ -59,10 +81,15 @@ function update() {
 
 function menu() {}
 
+function load(mode) {
+  socket.emit("play", { mode: mode });
+}
+
 function conection() {
+  // might not need this
   if (Date.now() - lastUpdate > 1000) {
     // make it a custom alert (overlay)
-    alert("connection lost");
+    alert("connection lost/ server error");
   }
 
   setTimeout(conection, 500);
@@ -98,6 +125,11 @@ window.onload = function () {
 
   socket.on("connect", () => {
     console.log("connected");
+    if (disconected) {
+      alert("reconnected"); // make it a custom alert (overlay)
+    }
+    conected = true;
+    disconected = false;
   });
 
   socket.on("update", (data) => {
@@ -106,14 +138,53 @@ window.onload = function () {
     cords1 = data.cords1;
     cords2 = data.cords2;
     lastUpdate = Date.now();
+    update();
+  });
+
+  socket.on("start", (data) => {
+    alert(`starting in ${data.secconds}`); // make it a custom alert (overlay)
+  });
+
+  socket.on("disconnect", () => {
+    alert("connection lost"); // make it a custom alert (overlay)
+    conected = false;
+    disconected = true;
+  });
+
+  socket.on("code", (data) => {
+    lobby.innerHTML += data.code;
+    if (lobby_hidden) {
+      lobby.classList.remove("hidden");
+      lobby_hidden = false;
+    }
+    switch (data.section) {
+      case "lobby_name_section":
+        lobby_name_section = document.getElementById("lobby-name");
+        button_lobby_name = document.getElementById("lobby-name-btn");
+        menu.classList.add("hidden");
+        lobby_name_section.classList.remove("hidden");
+        button_lobby_name.addEventListener("click", () => {});
+        break;
+      case "code_join_section":
+        code_join_section = document.getElementById("lobby-code-join");
+        button_lobby_join = document.getElementById("lobby-join-btn");
+        menu.classList.add("hidden");
+        code_join_section.classList.remove("hidden");
+
+        break;
+    }
+    // code_join_section.classList.remove("hidden");
+    // lobby_name_section.classList.add("hidden");
+    // lobby_joined_section.classList.add("hidden");
+    // join_code.innerHTML = data.code;
   });
 
   menu = document.getElementById("menu");
   lobby = document.getElementById("lobby");
   game = document.getElementById("game");
   end = document.getElementById("end");
-  code_join_section = document.getElementById("lobby-code-join");
-  lobby_name_section = document.getElementById("lobby-name");
+  // code_join_section = document.getElementById("lobby-code-join");
+  // lobby_name_section = document.getElementById("lobby-name");
   lobby_joined_section = document.getElementById("lobby-joined");
   join_code = document.getElementById("join-code-input");
   username = document.getElementById("name-input");
@@ -137,11 +208,28 @@ window.onload = function () {
   button_4_player = document.getElementById("4-player-btn");
   button_cerate_lobby = document.getElementById("create-lobby-btn");
   button_join_lobby = document.getElementById("join-lobby-btn");
-  button_lobby_join = document.getElementById("lobby-join-btn");
-  button_lobby_name = document.getElementById("lobby-name-btn");
-  button_lobby_settings = document.getElementById("lobby-settings-btn");
-  button_lobby_start = document.getElementById("lobby-start-btn");
-  button_lobby_settings_save = document.getElementById(
-    "lobby-settings-save-btn"
-  );
+  // button_lobby_join = document.getElementById("lobby-join-btn"); // add when html added from server
+  // button_lobby_name = document.getElementById("lobby-name-btn"); //
+  // button_lobby_settings = document.getElementById("lobby-settings-btn");
+  // button_lobby_start = document.getElementById("lobby-start-btn");
+  // button_lobby_settings_save = document.getElementById("lobby-settings-save-btn");
+
+  /////////////
+
+  button_2_player.addEventListener("click", () => {
+    load("2_player");
+  });
+  button_4_player.addEventListener("click", () => {
+    load("4_player");
+  });
+
+  button_cerate_lobby.addEventListener("click", () => {
+    load("create_lobby");
+    // menu.classList.add("hidden");
+    // lobby_name_section.classList.remove("hidden");
+  });
+
+  button_join_lobby.addEventListener("click", () => {
+    load("join_lobby");
+  });
 };
