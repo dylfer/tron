@@ -12,6 +12,12 @@ app = Flask(__name__,
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app)
 
+clients = {}
+games = {2: [], 4: []}  # example of game element
+
+
+def matching(data):
+
 
 @app.route("/")
 def main():
@@ -23,6 +29,7 @@ def connected():
     """event listener for when client connects to the server"""
     print(request.sid)
     print("client has connected")
+    clients.update({request.sid: {"status": "menu"}})
     emit("connect", {"data": f"id: {request.sid} is connected"})
 
 
@@ -36,6 +43,28 @@ def handle_message(data):
             emit("data", {'data': data, 'id': request.sid}, broadcast=True)
         case _:
             emit("data", {'data': data, 'id': request.sid}, broadcast=True)
+
+
+@socketio.on("play")
+def play(data):
+    match data["mode"]:
+        case "play":
+            if data["mode"] == "2_player":
+                clients[request.sid].update({"status": "play_que", "mode": 2})
+                matching(2)
+            elif data["mode"] == "4_player":
+                clients[request.sid].update({"status": "play_que", "mode": 4})
+                matching(4)
+            elif data["mode"] == "create_lobby":
+                pass
+            elif data["mode"] == "join_lobby":
+                pass
+        case "":
+            pass
+        case _:
+            pass
+
+    # emit("play", {"data": data, "id": request.sid}, broadcast=True)
 
 
 @socketio.on("disconnect")
