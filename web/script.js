@@ -14,6 +14,7 @@ let socket;
 let conected = false;
 let disconected = false;
 let lobby_creator = false;
+let last_view;
 
 ///////////////
 
@@ -128,6 +129,7 @@ window.onload = function () {
     if (disconected) {
       alert("reconnected"); // make it a custom alert (overlay)
     }
+    conection();
     conected = true;
     disconected = false;
   });
@@ -161,6 +163,7 @@ window.onload = function () {
       case "lobby_name_section":
         lobby_name_section = document.getElementById("lobby-name");
         button_lobby_name = document.getElementById("lobby-name-btn");
+        username = document.getElementById("name-input");
         menu.classList.add("hidden");
         lobby_name_section.classList.remove("hidden");
         button_lobby_name.addEventListener("click", () => {});
@@ -170,24 +173,41 @@ window.onload = function () {
         button_lobby_join = document.getElementById("lobby-join-btn");
         menu.classList.add("hidden");
         code_join_section.classList.remove("hidden");
-
+        button_lobby_join.addEventListener("click", () => {});
+        break;
+      case "lobby_joined_section":
+        lobby_joined_section = document.getElementById("lobby-joined");
+        button_lobby_settings = document.getElementById("lobby-settings-btn");
+        button_lobby_start = document.getElementById("lobby-start-btn");
+        menu.classList.add("hidden");
+        lobby_joined_section.classList.remove("hidden");
+        button_lobby_settings.addEventListener("click", () => {});
+        button_lobby_start.addEventListener("click", () => {});
+        break;
+      case "lobby_settings_section":
+        lobby_settings_section = document.getElementById("lobby-settings");
+        button_lobby_settings_save = document.getElementById(
+          "lobby-settings-save-btn"
+        );
+        menu.classList.add("hidden");
+        lobby_settings_section.classList.remove("hidden");
+        button_lobby_settings_save.addEventListener("click", () => {});
         break;
     }
-    // code_join_section.classList.remove("hidden");
-    // lobby_name_section.classList.add("hidden");
-    // lobby_joined_section.classList.add("hidden");
-    // join_code.innerHTML = data.code;
   });
 
   menu = document.getElementById("menu");
   lobby = document.getElementById("lobby");
   game = document.getElementById("game");
   end = document.getElementById("end");
+
   // code_join_section = document.getElementById("lobby-code-join");
   // lobby_name_section = document.getElementById("lobby-name");
-  lobby_joined_section = document.getElementById("lobby-joined");
-  join_code = document.getElementById("join-code-input");
-  username = document.getElementById("name-input");
+  // lobby_joined_section = document.getElementById("lobby-joined");
+  // join_code = document.getElementById("join-code-input");
+  // username = document.getElementById("name-input");
+
+  last_view = menu;
 
   /////////////
 
