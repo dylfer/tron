@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, render_template
 # join_room, leave_room, close_room, rooms, disconnect
-from flask_socketio import SocketIO, emit
+from flask_socketio import SocketIO, emit, join_room, leave_room, close_room, rooms
 from flask_cors import CORS
 import json
 import os
@@ -60,8 +60,9 @@ def chek_kill(coords, line):
 # server logic
 
 
-def matching(players):
-    if len(games[f"{players}_player"]) < 2:
+def matching(players, sid):
+    # TODO check if a game is being prepared and can alow for more to join
+    if len(modes[f"{players}_player"]) % players == 0:
         # print("Matched")
         # print(modes[f"{players}_player"])
         # for player in modes[f"{players}_player"]:
@@ -70,8 +71,30 @@ def matching(players):
         # modes[f"{players}_player"] = []
         if players == 4 and len(modes["2_player"]) % 2 == 1:
             pass  # match with 2 player because no 4 player users
+        elif players == 2 and len(modes["4_player"]) % 4 == 1 and len(queues["4_player"]) == 1:
+            pass  # match with user in 4 player queue
         else:
-            pass  # emmit waiting for players
+            modes[f"{players}_player"].append(sid)
+            queues[f"{players}_player"].append(sid)
+            return 0, "waiting for players"
+    if players == 4 and len(modes["4_player"]) % 4 != 0 and len(queues["4_player"]) == 0:
+        modes[f"4_player"].append(sid)
+        queues["4_player"].append(sid)
+        return 0, "waiting for game to end"
+    if players == 2 and len(modes["2_player"]) % 2 > 0:
+        modes[f"2_player"].append(sid)
+        return 1, ""
+    if players == 4 and len(modes["4_player"]) % 4 > 0:
+        modes[f"4_player"].append(sid)
+        return 1, ""
+    else:
+        modes[f"{players}_player"].append(sid)
+        queues[f"{players}_player"].append(sid)
+        return 0, "waiting for players"
+
+
+def start(peope, game_no):
+    pass  # count down then start game
 
 
 # server end points
@@ -84,8 +107,8 @@ def main():
 @socketio.on("connect")
 def connected():
     """event listener for when client connects to the server"""
-    print(request.sid)
-    print("client has connected")
+    # print(request.sid)
+    print(f"client {request.sid} has connected")
     clients.update({request.sid: {"status": "menu"}})
     # emit("connect", {"data": f"id: {request.sid} is connected"})
 
@@ -110,23 +133,63 @@ def play(data):
     print(data)
     match data["mode"]:
         case "2_player":
-            print("2 player")
             clients[request.sid].update({"status": "play_que", "mode": 2})
-            modes["2_player"].append(request.sid)
+            # modes["2_player"].append(request.sid)
             emit("starting", {"opration": "matching "})
-            matching(2)
-
-            # elif data["mode"] == "4_player":
-
-            # elif data["mode"] == "create_lobby":
-            #     pass
-            # elif data["mode"] == "join_lobby":
-            #     pass
+            action, other = matching(2, request.sid)
+            match action:
+                case 0:
+                    emit("starting", {"opration": other})
+                case 1:
+                    game_no = len(games[2])+1
+                    join_room(f"2_player_game_{str(game_no)}")
+                    join_room(f"2_player_game_{str(game_no)}",
+                              queues["2_player"][0])
+                    games[2].append({"players": {}, "settings": {
+                    }, "state": "creating", "roon": f"2_player_game_{str(game_no)}"})
+                    # more for the player atributes in the game data?
+                    games[2][game_no-1]["players"].update(
+                        {queues["2_player"][0]: {"cords": [], "trail": [], "score": 0}})
+                    games[2][game_no-1]["players"].update(
+                        {request.sid: {"cords": [], "trail": [], "score": 0}})
+                    queues["2_player"].pop(0)
+                    for id in games[2][game_no-1]["players"]:
+                        clients[id].update({"status": "preparing_game"})
+                    emit("starting", {
+                        "opration": "preparing game"}, to=f"2_player_game_{str(game_no)}")
+                    print(rooms())
+                    start(2, game_no)
         case "4_player":
             clients[request.sid].update({"status": "play_que", "mode": 4})
-            modes["4_player"].append(request.sid)
+            # modes["4_player"].append(request.sid)
             emit("starting", {"opration": "matching "})
-            matching(4)
+            action, other = matching(4, request.sid)
+            match action:
+                case 0:
+                    emit("starting", {"opration": other})
+                case 1:
+                    game_no = len(games[4])+1
+                    join_room(f"4_player_game_{str(game_no)}")
+                    for id in queues["4_player"][:2]:
+                        join_room(f"4_player_game_{str(game_no)}",
+                                  id)
+
+                    games[4].append({"players": {}, "settings": {
+                    }, "state": "creating", "roon": f"4_player_game_{str(game_no)}"})
+                    for id in queues["4_player"][:2]:
+                        # more for the player atributes in the game data?
+                        games[4][game_no-1]["players"].update(
+                            {id: {"cords": [], "trail": [], "score": 0}})
+                    games[4][game_no-1]["players"].update(
+                        {request.sid: {"cords": [], "trail": [], "score": 0}})
+
+                    for _ in queues["4_player"][:2]:
+                        queues["4_player"].pop(0)
+                    for id in games[4][game_no-1]["players"]:
+                        clients[id].update({"status": "preparing_game"})
+                    emit("starting", {"opration": "preparing game"},
+                         to=f"4_player_game_{str(game_no)}")
+                    start(4, game_no)
 
         case "create_lobby":
             pass

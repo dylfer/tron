@@ -124,11 +124,19 @@ window.onload = function () {
   socket.on("connect", () => {
     console.log("connected");
     if (disconected) {
-      alert("reconnected"); // make it a custom alert (overlay)
+      alert("reconnected"); // TODO make it a custom alert (overlay) or use a modul
     }
     conection();
     conected = true;
     disconected = false;
+  });
+
+  socket.on("disconnect", (reason, details) => {
+    console.log("disconnected because " + reason);
+    setScreen("menu");
+    alert("disconnected"); // make it a custom alert (overlay)
+    conected = false;
+    disconected = true;
   });
 
   socket.on("game_update", (data) => {
