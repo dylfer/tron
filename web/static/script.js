@@ -14,20 +14,29 @@ let socket;
 let conected = false;
 let disconected = false;
 let lobby_creator = false;
-let last_view;
+let last_view; // more presise version of stage for lobby views
 
 ///////////////
 
 let lobby_hidden = true;
-let menu;
-let lobby;
-let game;
-let end;
+// let menu;
+// let lobby;
+// let game;
+// let end;
+// let starting;
+let starting_info;
 let code_join_section;
 let lobby_name_section;
 let lobby_joined_section;
 let join_code;
 let username;
+let screens = {
+  menu: menu,
+  lobby: lobby,
+  game: game,
+  end: end,
+  starting: starting,
+};
 
 ///////////////
 
@@ -55,18 +64,8 @@ let button_lobby_settings_save;
 ///////////////
 
 function setScreen(screen) {
-  switch (screen) {
-    case "menu":
-      document.getElementById(stage).style.display = "none";
-      document.getElementById("menu").style.display = "block";
-      break;
-    case "game":
-      start();
-      break;
-    case "end":
-      end();
-      break;
-  }
+  screens[stage].classList.add("hidden");
+  screens[screen].classList.remove("hidden");
   stage = screen;
 }
 
@@ -74,13 +73,11 @@ function start(players) {
   // start sockets coms
 }
 
-function end() {}
+function end_game() {}
 
 function update() {
   //(main loop) caled every packet from server 10ms
 }
-
-function menu() {}
 
 function load(mode) {
   socket.emit("play", { mode: mode });
@@ -90,7 +87,7 @@ function conection() {
   // might not need this
   if (Date.now() - lastUpdate > 1000) {
     // make it a custom alert (overlay)
-    alert("connection lost/ server error");
+    // alert("connection lost/ server error");
   }
 
   setTimeout(conection, 500);
@@ -122,7 +119,7 @@ window.onload = function () {
   ctx = canvas.getContext("2d");
   ctx.drawImage(canvas, 0, 0);
 
-  const socket = io("localhost:5001/");
+  socket = io("localhost:80/");
 
   socket.on("connect", () => {
     console.log("connected");
@@ -134,28 +131,26 @@ window.onload = function () {
     disconected = false;
   });
 
-  socket.on("update", (data) => {
-    trail1 = data.trail1;
-    trail2 = data.trail2;
-    cords1 = data.cords1;
-    cords2 = data.cords2;
+  socket.on("game_update", (data) => {
+    trails = data.trails;
+    cords = data.cords;
     lastUpdate = Date.now();
     update();
   });
 
   socket.on("start", (data) => {
-    alert(`starting in ${data.secconds}`); // make it a custom alert (overlay)
+    // alert(`starting in ${data.secconds}`); // make it a custom alert (overlay)
   });
 
-  socket.on("disconnect", () => {
-    alert("connection lost"); // make it a custom alert (overlay)
-    conected = false;
-    disconected = true;
+  socket.on("starting", (data) => {
+    setScreen("starting");
+    starting_info.innerHTML = data.opration;
   });
 
   socket.on("code", (data) => {
-    lobby.innerHTML += data.code;
+    screens.lobby.innerHTML += data.code;
     if (lobby_hidden) {
+      // ?????????????????
       lobby.classList.remove("hidden");
       lobby_hidden = false;
     }
@@ -164,14 +159,14 @@ window.onload = function () {
         lobby_name_section = document.getElementById("lobby-name");
         button_lobby_name = document.getElementById("lobby-name-btn");
         username = document.getElementById("name-input");
-        menu.classList.add("hidden");
+        screens.menu.classList.add("hidden");
         lobby_name_section.classList.remove("hidden");
         button_lobby_name.addEventListener("click", () => {});
         break;
       case "code_join_section":
         code_join_section = document.getElementById("lobby-code-join");
         button_lobby_join = document.getElementById("lobby-join-btn");
-        menu.classList.add("hidden");
+        screens.menu.classList.add("hidden");
         code_join_section.classList.remove("hidden");
         button_lobby_join.addEventListener("click", () => {});
         break;
@@ -179,7 +174,7 @@ window.onload = function () {
         lobby_joined_section = document.getElementById("lobby-joined");
         button_lobby_settings = document.getElementById("lobby-settings-btn");
         button_lobby_start = document.getElementById("lobby-start-btn");
-        menu.classList.add("hidden");
+        screens.menu.classList.add("hidden");
         lobby_joined_section.classList.remove("hidden");
         button_lobby_settings.addEventListener("click", () => {});
         button_lobby_start.addEventListener("click", () => {});
@@ -189,17 +184,19 @@ window.onload = function () {
         button_lobby_settings_save = document.getElementById(
           "lobby-settings-save-btn"
         );
-        menu.classList.add("hidden");
+        screens.menu.classList.add("hidden");
         lobby_settings_section.classList.remove("hidden");
         button_lobby_settings_save.addEventListener("click", () => {});
         break;
     }
   });
 
-  menu = document.getElementById("menu");
-  lobby = document.getElementById("lobby");
-  game = document.getElementById("game");
-  end = document.getElementById("end");
+  screens.menu = document.getElementById("menu");
+  screens.lobby = document.getElementById("lobby");
+  screens.game = document.getElementById("game-screen");
+  screens.end = document.getElementById("end");
+  screens.starting = document.getElementById("starting");
+  starting_info = document.getElementById("starting-info");
 
   // code_join_section = document.getElementById("lobby-code-join");
   // lobby_name_section = document.getElementById("lobby-name");
@@ -236,6 +233,12 @@ window.onload = function () {
 
   /////////////
 
+  // button_local_1_player.addEventListener("click", () => {
+
+  // });
+  // button_local_2_player.addEventListener("click", () => {
+
+  // });
   button_2_player.addEventListener("click", () => {
     load("2_player");
   });
@@ -243,13 +246,13 @@ window.onload = function () {
     load("4_player");
   });
 
-  button_cerate_lobby.addEventListener("click", () => {
-    load("create_lobby");
-    // menu.classList.add("hidden");
-    // lobby_name_section.classList.remove("hidden");
-  });
+  // button_cerate_lobby.addEventListener("click", () => {
+  //   load("create_lobby");
+  //   // menu.classList.add("hidden");
+  //   // lobby_name_section.classList.remove("hidden");
+  // });
 
-  button_join_lobby.addEventListener("click", () => {
-    load("join_lobby");
-  });
+  // button_join_lobby.addEventListener("click", () => {
+  //   load("join_lobby");
+  // });
 };
