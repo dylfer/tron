@@ -61,7 +61,7 @@ def chek_kill(coords, line):
 
 
 def matching(players, sid):
-    # TODO check if a game is being prepared and can alow for more to join
+    # TODO check if a game is being prepared and can alow for more to join and make sure sid is not the same as other player (refrech page)
     if len(modes[f"{players}_player"]) % players == 0:
         # print("Matched")
         # print(modes[f"{players}_player"])
