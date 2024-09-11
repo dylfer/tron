@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, render_template
 # join_room, leave_room, close_room, rooms, disconnect
-from flask_socketio import SocketIO, emit, join_room, close_room
+from flask_socketio import SocketIO, emit, join_room, close_room, rooms
 from flask_cors import CORS
 import json
 import os
@@ -124,20 +124,28 @@ def game_loop(people, game_no):  # TODO add trail removal
     for player in games[people][game_no]["players"]:
         for cords in games[people][game_no]["players"][player]["trail"]:
             if chek_kill(games[people][game_no]["players"][player]["trail"], cords):
-                if people == 2:
-                    end(people, game_no)
+                del games[people][game_no]["players"][player]
                 emit("game_update", {"opration": "kill", "user": player},
                      to=f"{people}_player_game_{str(game_no)}")
+                if people == 2:
+                    end(people, game_no)
+                elif people == 4 and len(games[people][game_no]["players"]) == 1:
+                    end(people, game_no)
 
     emit("game_update", {"opration": "update", "data": games[people][game_no]["players"]},
          to=f"{people}_player_game_{str(game_no)}")
     # TODO add kill and end check an score
     end = time.time()
-    time.sleep(0.01-(end-start))  # for more acurate timeing
+    time.sleep(0.01-(end-start))  # ajust for time error
     game_loop(people, game_no)
 
 
+def end(people, game_no):
+    pass
+    close_room(f"{people}_player_game_{str(game_no)}")
+
 # server end points
+
 
 @app.route("/")
 def main():
@@ -156,13 +164,20 @@ def connected():
 @socketio.on('game_update')
 def handle_message(data):
     """event listener for when client sends data"""
-    match(json.loads(data)["opration"]):  # change to rooms brodcast
+    match(data["opration"]):  # change to rooms brodcast
         case "direction":
-            emit("game_update", {'data': data,
-                 'id': request.sid}, broadcast=True)
-        case "inactive":
-            emit("game_update", {'data': data,
-                 'id': request.sid}, broadcast=True)
+            if games[rooms()[1][0]][rooms()[1][-1]]["players"][request.sid]["direction"] == ("up" or "down") and data["direction"] == ("down" or "up") or games[rooms()[1][0]][rooms()[1][-1]]["players"][request.sid]["direction"] == ("left" or "right") and data["direction"] == ("right" or "left"):
+                emit("invalid", {"opration": "invalid direction"},)
+            games[rooms()[1][0]][rooms()[1][-1]]["players"][request.sid].update(
+                {"direction": data["direction"]})
+        case "speed":
+            if data["speed"] not in [1, 2]:
+                emit("invalid", {"opration": "invalid speed"})
+            games[rooms()[1][0]][rooms()[1][-1]]["players"][request.sid].update(
+                {"speed": data["speed"]})
+        # case "inactive":
+        #     emit("game_update", {'data': data,
+        #          'id': request.sid}, broadcast=True)
         case _:
             # emit("data", {'data': data, 'id': request.sid}, broadcast=True)
             pass
