@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, render_template
 # join_room, leave_room, close_room, rooms, disconnect
-from flask_socketio import SocketIO, emit, join_room, leave_room, close_room, rooms
+from flask_socketio import SocketIO, emit, join_room, close_room
 from flask_cors import CORS
 import json
 import os
@@ -93,6 +93,40 @@ def start(peope, game_no):  # count down then start game
         emit("starting", {"opration": f"starting {5-i}"},
              to=f"{peope}_player_game_{str(game_no)}")
         time.sleep(1)
+    emit("start", {"opration": "4"}, to=f"{peope}_player_game_{str(game_no)}")
+    time.sleep(1)
+    for i in range(3):
+        emit("start", {"opration": f"{3-i}"},
+             to=f"{peope}_player_game_{str(game_no)}")
+        time.sleep(1)
+    emit("start", {"opration": "0"}, to=f"{peope}_player_game_{str(game_no)}")
+    # TODO set starting cordonates
+    game_loop(peope, game_no)
+
+
+def game_loop(people, game_no):  # TODO add trail removal
+    start = time.time()
+    for player in games[people][game_no]["players"]:
+        if player["speed"] == True:
+            speed = 2
+        else:
+            speed = 1
+        match player["direction"]:
+            case "up":
+                player["cord"][1] -= speed
+            case "down":
+                player["cord"][1] += speed
+            case "left":
+                player["cord"][0] -= speed
+            case "right":
+                player["cord"][0] += speed
+        player["trail"].append(player["cord"])
+    emit("game_update", {"opration": "update", "data": games[people][game_no]["players"]}, to=f"{
+         people}_player_game_{str(game_no)}")
+    # TODO add kill and end check an score
+    end = time.time()
+    time.sleep(0.01-(end-start))  # for more acurate timeing
+    game_loop(people, game_no)
 
 
 # server end points
