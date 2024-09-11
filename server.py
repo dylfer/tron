@@ -121,8 +121,16 @@ def game_loop(people, game_no):  # TODO add trail removal
             case "right":
                 player["cord"][0] += speed
         player["trail"].append(player["cord"])
-    emit("game_update", {"opration": "update", "data": games[people][game_no]["players"]}, to=f"{
-         people}_player_game_{str(game_no)}")
+    for player in games[people][game_no]["players"]:
+        for cords in games[people][game_no]["players"][player]["trail"]:
+            if chek_kill(games[people][game_no]["players"][player]["trail"], cords):
+                if people == 2:
+                    end(people, game_no)
+                emit("game_update", {"opration": "kill", "user": player},
+                     to=f"{people}_player_game_{str(game_no)}")
+
+    emit("game_update", {"opration": "update", "data": games[people][game_no]["players"]},
+         to=f"{people}_player_game_{str(game_no)}")
     # TODO add kill and end check an score
     end = time.time()
     time.sleep(0.01-(end-start))  # for more acurate timeing
