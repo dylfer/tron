@@ -26,6 +26,35 @@ clock = pygame.time.Clock()
 
 
 # game logic
+
+def shorten_trail(trail):
+    if len(trail) <= 3:
+        return trail
+
+    shortened_trail = [trail[0]]  # Start with the first coordinate
+    current_direction = None
+
+    for i in range(1, len(trail) - 2):
+        prev_coord = trail[i - 1]
+        curr_coord = trail[i]
+
+        # Determine the direction
+        if curr_coord[0] == prev_coord[0]:
+            direction = 'vertical'
+        else:
+            direction = 'horizontal'
+
+        # Add coordinate if direction changes
+        if direction != current_direction:
+            shortened_trail.append(curr_coord)
+            current_direction = direction
+
+    # Add the last 3 coordinates
+    shortened_trail.extend(trail[-3:])
+
+    return shortened_trail
+
+
 def chek_kill(coords, line):
     """
     Check if the specified line crosses any of the lines formed by the list of coordinates.
@@ -60,8 +89,7 @@ def chek_kill(coords, line):
     return False
 
 
-def game_loop(people, game_no):  # TODO add trail removal
-    # start = time.time()
+def game_loop(people, game_no, frame):  # TODO add trail removal
     for player in games[people][game_no-1]["players"]:
         speed = games[people][game_no-1]["players"][player]["speed"]
         match games[people][game_no-1]["players"][player]["direction"]:
@@ -90,10 +118,12 @@ def game_loop(people, game_no):  # TODO add trail removal
     emit("game_update", {"opration": "update", "data": games[people][game_no-1]["players"]},
          to=f"{people}_player_game_{str(game_no)}")
     # TODO add kill and end check an score
-    # stop = time.time()
     clock.tick(100)
-    # time.sleep(0.01-(stop-start))  # ajust for time error
-    game_loop(people, game_no)
+    if frame % 7 == 0:
+        for player in games[people][game_no-1]["players"]:
+            games[people][game_no-1]["players"][player]["trail"] = shorten_trail(
+                games[people][game_no-1]["players"][player]["trail"])
+    game_loop(people, game_no, frame+1)
 
 
 # server logic
@@ -213,7 +243,7 @@ def start(people, game_no):  # count down then start game
         i += 1
 
     games[people][game_no-1].update({"state": "running"})
-    game_loop(people, game_no)
+    game_loop(people, game_no, 0)
 
 
 def end(people, game_no):
