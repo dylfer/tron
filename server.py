@@ -107,7 +107,7 @@ def game_loop(people, game_no, frame):  # TODO add trail removal
         for player2 in games[people][game_no-1]["players"]:
             # thare is a bug whare 1 or 2 pixels are not used in the kill check but it would take precice timing to pass thourgh anothers trail
             if chek_kill(games[people][game_no-1]["players"][player]["trail"][:-2], games[people][game_no-1]["players"][player2]["trail"][-2:]):
-                del games[people][game_no-1]["players"][player]
+                # del games[people][game_no-1]["players"][player] create a fnction to kill player
                 emit("game_update", {"opration": "kill", "user": player},
                      to=f"{people}_player_game_{str(game_no)}")
                 if people == 2:
