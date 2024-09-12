@@ -60,6 +60,39 @@ def chek_kill(coords, line):
 
 # server logic
 
+def generate_coordinates(players):
+    # Define play area dimensions
+    width, height = 1500, 800
+
+    # Initialize list to store coordinates
+    coordinates = []
+
+    # Define positions for 2 players
+    if players == 2:
+        coordinates = [[20, height // 2], [width - 20, height // 2]]
+
+    # Define positions for 3 players
+    elif players == 3:
+        coordinates = [[20, height // 2], [width - 20,
+                                           height // 3], [width - 20, 2 * height // 3]]
+
+    # Define positions for 4 players
+    elif players == 4:
+        coordinates = [[20, height // 3], [20, 2 * height // 3],
+                       [width - 20, height // 3], [width - 20, 2 * height // 3]]
+
+    # Define positions for more than 4 players up to 20
+    else:
+        for i in range(players):
+            if i % 2 == 0:
+                x = 20
+            else:
+                x = width - 20
+            y = (i // 2 + 1) * height // (players // 2 + 1)
+            coordinates.append([x, y])
+
+    return coordinates
+
 
 def matching(players, sid):
     # TODO check if a game is being prepared and can alow for more to join and make sure sid is not the same as other player (refrech page)
@@ -88,51 +121,56 @@ def matching(players, sid):
         return 0, "waiting for players"
 
 
-def start(peope, game_no):  # count down then start game
+def start(people, game_no):  # count down then start game
     for i in range(5):
         emit("starting", {"opration": f"starting {5-i}"},
-             to=f"{peope}_player_game_{str(game_no)}")
+             to=f"{people}_player_game_{str(game_no)}")
         time.sleep(1)
-    emit("start", {"opration": "4"}, to=f"{peope}_player_game_{str(game_no)}")
+    emit("start", {"opration": "4"}, to=f"{people}_player_game_{str(game_no)}")
     time.sleep(1)
     for i in range(3):
         emit("start", {"opration": f"{3-i}"},
-             to=f"{peope}_player_game_{str(game_no)}")
+             to=f"{people}_player_game_{str(game_no)}")
         time.sleep(1)
-    emit("start", {"opration": "0"}, to=f"{peope}_player_game_{str(game_no)}")
+    emit("start", {"opration": "0"}, to=f"{people}_player_game_{str(game_no)}")
     # TODO set starting cordonates
-    game_loop(peope, game_no)
+    i = 0
+    for player in games[people][game_no-1]["players"]:
+        games[people][game_no-1]["players"][player].update(
+            {"cord": generate_coordinates(people)[i]})
+        games[people][game_no-1]["players"][player].update(
+            {"trail": [generate_coordinates(people)[i]]})
+        i += 1
+    game_loop(people, game_no)
 
 
 def game_loop(people, game_no):  # TODO add trail removal
     start = time.time()
-    for player in games[people][game_no]["players"]:
-        if player["speed"] == True:
-            speed = 2
-        else:
-            speed = 1
-        match player["direction"]:
+    for player in games[people][game_no-1]["players"]:
+        speed = games[people][game_no-1]["players"][player]["speed"]
+        match games[people][game_no-1]["players"][player]["direction"]:
             case "up":
-                player["cord"][1] -= speed
+                games[people][game_no-1]["players"][player]["cord"][1] -= speed
             case "down":
-                player["cord"][1] += speed
+                games[people][game_no-1]["players"][player]["cord"][1] += speed
             case "left":
-                player["cord"][0] -= speed
+                games[people][game_no-1]["players"][player]["cord"][0] -= speed
             case "right":
-                player["cord"][0] += speed
-        player["trail"].append(player["cord"])
-    for player in games[people][game_no]["players"]:
-        for cords in games[people][game_no]["players"][player]["trail"]:
-            if chek_kill(games[people][game_no]["players"][player]["trail"], cords):
-                del games[people][game_no]["players"][player]
+                games[people][game_no-1]["players"][player]["cord"][0] += speed
+        games[people][game_no - 1]["players"][player]["trail"].append(
+            games[people][game_no-1]["players"][player]["cord"])
+    for player in games[people][game_no-1]["players"]:
+        for player2 in games[people][game_no-1]["players"]:
+            if chek_kill(games[people][game_no-1]["players"][player]["trail"], games[people][game_no-1]["players"][player2]["trail"][-2:]):
+                del games[people][game_no-1]["players"][player]
                 emit("game_update", {"opration": "kill", "user": player},
                      to=f"{people}_player_game_{str(game_no)}")
                 if people == 2:
                     end(people, game_no)
-                elif people == 4 and len(games[people][game_no]["players"]) == 1:
+                elif people == 4 and len(games[people][game_no-1]["players"]) == 1:
                     end(people, game_no)
 
-    emit("game_update", {"opration": "update", "data": games[people][game_no]["players"]},
+    emit("game_update", {"opration": "update", "data": games[people][game_no-1]["players"]},
          to=f"{people}_player_game_{str(game_no)}")
     # TODO add kill and end check an score
     end = time.time()
@@ -190,7 +228,7 @@ def play(data):
         case "2_player":
             clients[request.sid].update({"status": "play_que", "mode": 2})
             # modes["2_player"].append(request.sid)
-            emit("starting", {"opration": "matching "})
+            emit("starting", {"opration": "matching"})
             action, other = matching(2, request.sid)
             match action:
                 case 0:  # waiting
@@ -204,9 +242,9 @@ def play(data):
                     }, "state": "creating", "roon": f"2_player_game_{str(game_no)}"})
                     # more for the player atributes in the game data?
                     games[2][game_no-1]["players"].update(
-                        {queues["2_player"][0]: {"cords": [], "trail": [], "score": 0}})
+                        {queues["2_player"][0]: {"cord": [], "trail": [], "speed": 1, "direction": "right"}})
                     games[2][game_no-1]["players"].update(
-                        {request.sid: {"cords": [], "trail": [], "score": 0}})
+                        {request.sid: {"cord": [], "trail": [], "speed": 1, "direction": "right"}})
                     queues["2_player"].pop(0)
                     for id in games[2][game_no-1]["players"]:
                         clients[id].update({"status": "preparing_game"})
@@ -222,9 +260,9 @@ def play(data):
                     }, "state": "creating", "roon": f"2_player_game_{str(game_no)}"})
                     # more for the player atributes in the game data?
                     games[2][game_no-1]["players"].update(
-                        {queues["4_player"][0]: {"cords": [], "trail": [], "score": 0}})
+                        {queues["4_player"][0]: {"cord": [], "trail": [], "speed": 1, "direction": "right"}})
                     games[2][game_no-1]["players"].update(
-                        {request.sid: {"cords": [], "trail": [], "score": 0}})
+                        {request.sid: {"cord": [], "trail": [], "speed": 1, "direction": "right"}})
                     queues["4_player"].pop(0)
                     for id in games[2][game_no-1]["players"]:
                         clients[id].update({"status": "preparing_game"})
@@ -250,9 +288,9 @@ def play(data):
                     for id in queues["4_player"][:2]:
                         # more for the player atributes in the game data?
                         games[4][game_no-1]["players"].update(
-                            {id: {"cords": [], "trail": [], "score": 0}})
+                            {id: {"cord": [], "trail": [], "speed": 1, "direction": "right"}})
                     games[4][game_no-1]["players"].update(
-                        {request.sid: {"cords": [], "trail": [], "score": 0}})
+                        {request.sid: {"cord": [], "trail": [], "speed": 1, "direction": "right"}})
 
                     for _ in queues["4_player"][:2]:
                         queues["4_player"].pop(0)
@@ -270,9 +308,9 @@ def play(data):
                     }, "state": "creating", "roon": f"2_player_game_{str(game_no)}"})
                     # more for the player atributes in the game data?
                     games[2][game_no-1]["players"].update(
-                        {queues["2_player"][0]: {"cords": [], "trail": [], "score": 0}})
+                        {queues["2_player"][0]: {"cord": [], "trail": [], "speed": 1, "direction": "right"}})
                     games[2][game_no-1]["players"].update(
-                        {request.sid: {"cords": [], "trail": [], "score": 0}})
+                        {request.sid: {"cord": [], "trail": [], "speed": 1, "direction": "right"}})
                     queues["2_player"].pop(0)
                     for id in games[2][game_no-1]["players"]:
                         clients[id].update({"status": "preparing_game"})
