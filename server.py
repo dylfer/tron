@@ -5,6 +5,7 @@ from flask_cors import CORS
 import json
 import os
 import time
+import pygame
 # use time to ajust the game clock for error in time
 
 app = Flask(__name__,
@@ -21,6 +22,7 @@ games = {2: [], 4: []}  # active games and players
 modes = {"2_player": [], "4_player": []}
 queues = {"2_player": [], "4_player": []}
 lobbies = {}  # lobbies, rooms, players and settings
+clock = pygame.time.Clock()
 
 
 # game logic
@@ -58,40 +60,105 @@ def chek_kill(coords, line):
     return False
 
 
+def game_loop(people, game_no):  # TODO add trail removal
+    # start = time.time()
+    for player in games[people][game_no-1]["players"]:
+        speed = games[people][game_no-1]["players"][player]["speed"]
+        match games[people][game_no-1]["players"][player]["direction"]:
+            case "up":
+                games[people][game_no-1]["players"][player]["cord"][1] -= speed
+            case "down":
+                games[people][game_no-1]["players"][player]["cord"][1] += speed
+            case "left":
+                games[people][game_no-1]["players"][player]["cord"][0] -= speed
+            case "right":
+                games[people][game_no-1]["players"][player]["cord"][0] += speed
+        games[people][game_no - 1]["players"][player]["trail"].append(
+            games[people][game_no-1]["players"][player]["cord"][:])
+    for player in games[people][game_no-1]["players"]:
+        for player2 in games[people][game_no-1]["players"]:
+            # thare is a bug whare 1 or 2 pixels are not used in the kill check but it would take precice timing to pass thourgh anothers trail
+            if chek_kill(games[people][game_no-1]["players"][player]["trail"][:-2], games[people][game_no-1]["players"][player2]["trail"][-2:]):
+                del games[people][game_no-1]["players"][player]
+                emit("game_update", {"opration": "kill", "user": player},
+                     to=f"{people}_player_game_{str(game_no)}")
+                if people == 2:
+                    end(people, game_no)
+                elif people == 4 and len(games[people][game_no-1]["players"]) == 1:
+                    end(people, game_no)
+
+    emit("game_update", {"opration": "update", "data": games[people][game_no-1]["players"]},
+         to=f"{people}_player_game_{str(game_no)}")
+    # TODO add kill and end check an score
+    # stop = time.time()
+    clock.tick(100)
+    # time.sleep(0.01-(stop-start))  # ajust for time error
+    game_loop(people, game_no)
+
+
 # server logic
+
+def determine_direction(coord, width, height):
+    """
+    Determine the initial direction based on the starting coordinates.
+
+    :param coord: Tuple representing the coordinates (x, y)
+    :param width: Width of the play area
+    :param height: Height of the play area
+    :return: String representing the direction ("up", "down", "left", "right")
+    """
+    x, y = coord
+    if x <= 20:
+        return "right"
+    elif x >= width - 20:
+        return "left"
+    elif y <= 20:
+        return "down"
+    else:
+        return "up"
+
 
 def generate_coordinates(players):
     # Define play area dimensions
     width, height = 1500, 800
 
-    # Initialize list to store coordinates
-    coordinates = []
+    # Initialize list to store coordinates and directions
+    coordinates_and_directions = []
 
     # Define positions for 2 players
     if players == 2:
-        coordinates = [[20, height // 2], [width - 20, height // 2]]
+        coords = [[20, height // 2], [width - 20, height // 2]]
+        coordinates_and_directions = [
+            (coord, determine_direction(coord, width, height)) for coord in coords]
 
     # Define positions for 3 players
     elif players == 3:
-        coordinates = [[20, height // 2], [width - 20,
-                                           height // 3], [width - 20, 2 * height // 3]]
+        coords = [[20, height // 2], [width - 20, height // 3],
+                  [width - 20, 2 * height // 3]]
+        coordinates_and_directions = [
+            (coord, determine_direction(coord, width, height)) for coord in coords]
 
     # Define positions for 4 players
     elif players == 4:
-        coordinates = [[20, height // 3], [20, 2 * height // 3],
-                       [width - 20, height // 3], [width - 20, 2 * height // 3]]
+        coords = [[20, height // 3], [20, 2 * height // 3],
+                  [width - 20, height // 3], [width - 20, 2 * height // 3]]
+        coordinates_and_directions = [
+            (coord, determine_direction(coord, width, height)) for coord in coords]
 
     # Define positions for more than 4 players up to 20
     else:
+        coords = []
         for i in range(players):
             if i % 2 == 0:
                 x = 20
             else:
                 x = width - 20
             y = (i // 2 + 1) * height // (players // 2 + 1)
-            coordinates.append([x, y])
+            coords.append([x, y])
+        coordinates_and_directions = [
+            (coord, determine_direction(coord, width, height)) for coord in coords]
 
-    return coordinates
+    return coordinates_and_directions
 
 
 def matching(players, sid):
@@ -135,46 +202,17 @@ def start(people, game_no):  # count down then start game
     emit("start", {"opration": "0"}, to=f"{people}_player_game_{str(game_no)}")
     # TODO set starting cordonates
     i = 0
+    cords = generate_coordinates(people)
     for player in games[people][game_no-1]["players"]:
         games[people][game_no-1]["players"][player].update(
-            {"cord": generate_coordinates(people)[i]})
+            {"cord": cords[i][0]})
         games[people][game_no-1]["players"][player].update(
-            {"trail": [generate_coordinates(people)[i]]})
+            {"trail": [cords[i][0][:]]})
+        games[people][game_no-1]["players"][player].update(
+            {"direction": cords[i][1]})
         i += 1
-    game_loop(people, game_no)
 
-
-def game_loop(people, game_no):  # TODO add trail removal
-    start = time.time()
-    for player in games[people][game_no-1]["players"]:
-        speed = games[people][game_no-1]["players"][player]["speed"]
-        match games[people][game_no-1]["players"][player]["direction"]:
-            case "up":
-                games[people][game_no-1]["players"][player]["cord"][1] -= speed
-            case "down":
-                games[people][game_no-1]["players"][player]["cord"][1] += speed
-            case "left":
-                games[people][game_no-1]["players"][player]["cord"][0] -= speed
-            case "right":
-                games[people][game_no-1]["players"][player]["cord"][0] += speed
-        games[people][game_no - 1]["players"][player]["trail"].append(
-            games[people][game_no-1]["players"][player]["cord"])
-    for player in games[people][game_no-1]["players"]:
-        for player2 in games[people][game_no-1]["players"]:
-            if chek_kill(games[people][game_no-1]["players"][player]["trail"], games[people][game_no-1]["players"][player2]["trail"][-2:]):
-                del games[people][game_no-1]["players"][player]
-                emit("game_update", {"opration": "kill", "user": player},
-                     to=f"{people}_player_game_{str(game_no)}")
-                if people == 2:
-                    end(people, game_no)
-                elif people == 4 and len(games[people][game_no-1]["players"]) == 1:
-                    end(people, game_no)
-
-    emit("game_update", {"opration": "update", "data": games[people][game_no-1]["players"]},
-         to=f"{people}_player_game_{str(game_no)}")
-    # TODO add kill and end check an score
-    end = time.time()
-    time.sleep(0.01-(end-start))  # ajust for time error
+    games[people][game_no-1].update({"state": "running"})
     game_loop(people, game_no)
 
 
