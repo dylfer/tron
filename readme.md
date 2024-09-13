@@ -4,6 +4,7 @@ this is the game tron light cycles with multyplayer
 
 
 ## TODO
+ - [ ] add licence 
 python
 - [ ] check if a game is being prepared and can alow for more to join 
 - [ ] make sure sid is not the same as other player (refrech page)
