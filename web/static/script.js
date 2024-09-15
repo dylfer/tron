@@ -1,3 +1,23 @@
+//
+// Tron - a server based multiplayer tron game for the web
+// Copyright (C) 2024 Dylan Ferrow
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+//
+//
+//NOTE: this has only been used for personal use. i dont own the images used in this project, use them at your own risk, thy are not part of this license suplied with this project
+
 let canvas;
 let ctx;
 let player1 = new Image();
@@ -5,8 +25,9 @@ player1.src = "/player1.png";
 let player2 = new Image();
 player2.src = "/player2.png";
 let stage = "menu";
-let trails = []; // sent by server
-let cords = []; // sent by server
+// let trails = []; // sent by server
+// let cords = []; // sent by server
+let game = {}; // sent by server
 let lastUpdate = Date.now();
 let socket;
 let conected = false;
@@ -16,6 +37,7 @@ let last_view; // more presise version of stage for lobby views
 let directions = ["up", "right", "down", "left"];
 let direction = 1;
 let game_active = false;
+let reverse = false; // so evreyone is on the left side of the screen
 
 ///////////////
 
@@ -89,10 +111,6 @@ function draw_grid() {
   ctx.stroke();
 }
 
-function start(players) {
-  // start sockets coms
-}
-
 function end_game() {}
 
 function update() {
@@ -104,37 +122,70 @@ function load(mode) {
   socket.emit("play", { mode: mode });
 }
 
-function conection() {
-  // might not need this
-  if (Date.now() - lastUpdate > 1000) {
-    // make it a custom alert (overlay)
-    // alert("connection lost/ server error");
-  }
+// function conection() {
+//   // might not need this
+//   if (Date.now() - lastUpdate > 1000) {
+//     // make it a custom alert (overlay)
+//     // alert("connection lost/ server error");
+//   }
 
-  setTimeout(conection, 500);
+//   setTimeout(conection, 500);
+// }
+
+function keydown(e) {
+  switch (e.key) {
+    case "w":
+      socket.emit("speed", { opration: "speed", speed: 2 });
+    case "a":
+      direction += 1;
+      if (direction > 3) {
+        direction = 0;
+      }
+      socket.emit("game_update", {
+        opration: "direction",
+        direction: directions[direction],
+      });
+    case "d":
+      direction -= 1;
+      if (direction < 0) {
+        direction = 3;
+      }
+      socket.emit("game_update", {
+        opration: "direction",
+        direction: directions[direction],
+      });
+  }
+}
+
+function keyup(e) {
+  switch (e.key) {
+    case "w":
+      if (game_active) {
+        socket.emit("speed", { opration: "speed", speed: 1 });
+      }
+  }
 }
 
 function draw() {
-  // check this
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   draw_grid();
-  for (let i = 0; i < trails.length; i++) {
-    if (trails[i].id == socket.id) {
-      // wont work find place to get id
+  for (const id in game) {
+    if (game[id].id == socket.id) {
       ctx.fillStyle = "blue";
     } else {
       ctx.fillStyle = "red";
     }
-    ctx.fillStyle = trails[i].color;
-    for (let j = 0; j < trails[i].trail.length; j++) {
-      ctx.fillRect(trails[i].trail[j].x, trails[i].trail[j].y, 10, 10);
+    for (let i = 0; i < game[id].trail.length - 1; i++) {
+      ctx.moveTo(game[id].trail[i].x, game[id].trail[i].y);
+      ctx.lineTo(game[id].trail[i + 1].x, game[id].trail[i + 1].y);
     }
+    ctx.stroke();
   }
-  for (let i = 0; i < cords.length; i++) {
-    if (cords[i].id == socket.id) {
-      ctx.drawImage(player1, cords[i].x, cords[i].y, 10, 10);
+  for (const id in game) {
+    if (id == socket.id) {
+      ctx.drawImage(player1, game[id].cord[0], game[id].cord[1], 30, 10);
     } else {
-      ctx.drawImage(player2, cords[i].x, cords[i].y, 10, 10);
+      ctx.drawImage(player2, game[id].cord[0], game[id].cord[1], 30, 10);
     }
   }
 }
@@ -155,7 +206,7 @@ window.onload = function () {
     if (disconected) {
       alert("reconnected"); // TODO make it a custom alert (overlay) or use a modul
     }
-    conection();
+    // conection();
     conected = true;
     disconected = false;
     console.log(socket.id);
@@ -170,14 +221,15 @@ window.onload = function () {
   });
 
   socket.on("game_update", (data) => {
+    // console.log("update");
     if (data.opration == "end") {
       setScreen("end");
       end_game();
     } else if (data.opration == "kill") {
       console.log("dead");
     } else {
-      trails = data.trails;
-      cords = data.cords;
+      // console.log("movement");
+      game = data.data;
       lastUpdate = Date.now();
       update();
     }
@@ -193,32 +245,10 @@ window.onload = function () {
     if (data.opration == "0") {
       game_active = true;
       direction = 1;
-      screens.game.addEventListener("keydown", (e) => {
-        switch (e.key) {
-          case "w":
-            socket.emit("speed", { speed: 2 });
-          case "a":
-            direction += 1;
-            if (direction > 3) {
-              direction = 0;
-            }
-            socket.emit("game_update", { direction: directions[direction] });
-          case "s":
-            direction -= 1;
-            if (direction < 0) {
-              direction = 3;
-            }
-            socket.emit("game_update", { direction: directions[direction] });
-        }
-      });
-      screens.game.addEventListener("keyup", (e) => {
-        switch (e.key) {
-          case "w":
-            if (game_active) {
-              socket.emit("speed", { speed: 1 });
-            }
-        }
-      });
+      console.log(screens.game);
+      screens.game.focus();
+      screens.game.addEventListener("keydown", keydown);
+      screens.game.addEventListener("keyup", keyup);
     }
     // alert(`starting in ${data.secconds}`); // make it a custom alert (overlay)
   });

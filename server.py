@@ -1,3 +1,25 @@
+#
+# tron light cycles - <A brief description of what the program does.>
+# Copyright (C) <year> <name of copyright owner>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+#
+# NOTE: this has only been used for personal use. i dont own the images used in this project, use them at your own risk, thy are not part of this license suplied with this project
+#
+#
+
 from flask import Flask, request, jsonify, render_template
 # join_room, leave_room, close_room, rooms, disconnect
 from flask_socketio import SocketIO, emit, join_room, close_room, rooms
@@ -272,9 +294,10 @@ def handle_message(data):
     """event listener for when client sends data"""
     match(data["opration"]):  # change to rooms brodcast
         case "direction":
-            if games[rooms()[1][0]][rooms()[1][-1]]["players"][request.sid]["direction"] == ("up" or "down") and data["direction"] == ("down" or "up") or games[rooms()[1][0]][rooms()[1][-1]]["players"][request.sid]["direction"] == ("left" or "right") and data["direction"] == ("right" or "left"):
+            # print(rooms())
+            if games[int(rooms()[1][0])][int(rooms()[1][-1])-1]["players"][request.sid]["direction"] == ("up" or "down") and data["direction"] == ("down" or "up") or games[int(rooms()[1][0])][int(rooms()[1][-1])-1]["players"][request.sid]["direction"] == ("left" or "right") and data["direction"] == ("right" or "left"):
                 emit("invalid", {"opration": "invalid direction"},)
-            games[rooms()[1][0]][rooms()[1][-1]]["players"][request.sid].update(
+            games[int(rooms()[1][0])][int(rooms()[1][-1])-1]["players"][request.sid].update(
                 {"direction": data["direction"]})
         case "speed":
             if data["speed"] not in [1, 2]:
@@ -399,6 +422,18 @@ def play(data):
 @socketio.on("disconnect")
 def disconnected():
     """event listener for when client disconnects to the server"""
+    del clients[request.sid]
+    for mode in modes:
+        if request.sid in modes[mode]:
+            modes[mode].remove(request.sid)
+    for queue in queues:
+        if request.sid in queues[queue]:
+            queues[queue].remove(request.sid)
+    for game in games:
+        for player in games[game]:
+            if request.sid in games[game][player]["players"]:
+                # send player disconect request
+                del games[game][player]["players"][request.sid]
     print("user disconnected")
     emit("disconnect", f"user {request.sid} disconnected", broadcast=True)
 
