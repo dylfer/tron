@@ -3,6 +3,8 @@ this is the game tron light cycles with multyplayer
 
 
 ## Run
+install requirements
+```pip install -r requirements.txt```
 run server.py using python
 ```python3 server.py```
 
@@ -19,7 +21,7 @@ python
 - [ ] add game end
 - [ ] add lobbies (easy)
 - [ ] add outer wall checks 
-- [ ] 
+- [ ] leaderboard
 
 javascript
 - [ ] alert overlay (use sweetalert2)
@@ -29,6 +31,8 @@ javascript
 - [ ] add  fliped view 
 - [ ] add icon rotation
 - [ ] fix trails
+- [ ] leaderboard
+- [ ] single player
 
 
 
