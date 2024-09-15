@@ -134,8 +134,10 @@ def game_loop(people, game_no, frame):  # TODO add trail removal
                      to=f"{people}_player_game_{str(game_no)}")
                 if people == 2:
                     end(people, game_no)
+                    return False, frame
                 elif people == 4 and len(games[people][game_no-1]["players"]) == 1:
                     end(people, game_no)
+                    return False, frame
 
     emit("game_update", {"opration": "update", "data": games[people][game_no-1]["players"]},
          to=f"{people}_player_game_{str(game_no)}")
@@ -145,7 +147,7 @@ def game_loop(people, game_no, frame):  # TODO add trail removal
         for player in games[people][game_no-1]["players"]:
             games[people][game_no-1]["players"][player]["trail"] = shorten_trail(
                 games[people][game_no-1]["players"][player]["trail"])
-    game_loop(people, game_no, frame+1)
+    return True, frame+1
 
 
 # server logic
@@ -265,7 +267,13 @@ def start(people, game_no):  # count down then start game
         i += 1
 
     games[people][game_no-1].update({"state": "running"})
-    game_loop(people, game_no, 0)
+    loop_run(people, game_no, 0)
+
+
+def loop_run(people, game_no, frame):
+    alive = True
+    while alive:
+        alive, frame = game_loop(people, game_no, frame)
 
 
 def end(people, game_no):
