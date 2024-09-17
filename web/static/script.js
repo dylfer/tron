@@ -199,7 +199,9 @@ window.onload = function () {
   ctx = canvas.getContext("2d");
   ctx.drawImage(canvas, 0, 0);
 
-  socket = io("localhost:80/");
+  socket = io("localhost:80/", {
+    transports: ["websocket", "polling", "flashsocket"],
+  });
 
   socket.on("connect", () => {
     console.log("connected");
@@ -210,6 +212,10 @@ window.onload = function () {
     conected = true;
     disconected = false;
     console.log(socket.id);
+  });
+
+  socket.on("connect_error", (err) => {
+    console.log(`connect_error due to ${err.message}`);
   });
 
   socket.on("disconnected", (reason, details) => {
