@@ -169,23 +169,30 @@ function keyup(e) {
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   draw_grid();
-  for (const id in game) {
-    if (game[id].id == socket.id) {
-      ctx.fillStyle = "blue";
-    } else {
-      ctx.fillStyle = "red";
-    }
-    for (let i = 0; i < game[id].trail.length - 1; i++) {
-      ctx.moveTo(game[id].trail[i].x, game[id].trail[i].y);
-      ctx.lineTo(game[id].trail[i + 1].x, game[id].trail[i + 1].y);
-    }
-    ctx.stroke();
-  }
+  ctx.lineWidth = 1;
   for (const id in game) {
     if (id == socket.id) {
-      ctx.drawImage(player1, game[id].cord[0], game[id].cord[1], 30, 10);
+      ctx.strokeStyle = "rgb(0, 150, 255)";
     } else {
-      ctx.drawImage(player2, game[id].cord[0], game[id].cord[1], 30, 10);
+      ctx.strokeStyle = "red";
+    }
+
+    ctx.beginPath(); // Begin a new path for each player's trail
+
+    for (let i = 0; i < game[id].trail.length - 1; i++) {
+      ctx.moveTo(game[id].trail[i][0], game[id].trail[i][1]);
+      ctx.lineTo(game[id].trail[i + 1][0], game[id].trail[i + 1][1]);
+    }
+
+    ctx.stroke(); // Stroke the path
+    ctx.closePath(); // Optionally close the path
+  }
+
+  for (const id in game) {
+    if (id == socket.id) {
+      ctx.drawImage(player1, game[id].cord[0], game[id].cord[1] - 5, 30, 10);
+    } else {
+      ctx.drawImage(player2, game[id].cord[0], game[id].cord[1] - 5, 30, 10);
     }
   }
 }
@@ -233,6 +240,8 @@ window.onload = function () {
       end_game();
     } else if (data.opration == "kill") {
       console.log("dead");
+      alert("end");
+      window.location.reload();
     } else {
       // console.log("movement");
       game = data.data;
