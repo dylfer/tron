@@ -206,7 +206,7 @@ window.onload = function () {
   ctx = canvas.getContext("2d");
   ctx.drawImage(canvas, 0, 0);
 
-  socket = io(`${window.location}/`, {
+  socket = io(window.location.host + "/", {
     transports: ["websocket", "polling", "flashsocket"],
   });
 
