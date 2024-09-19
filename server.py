@@ -1,6 +1,6 @@
 #
-# tron light cycles - <A brief description of what the program does.>
-# Copyright (C) <year> <name of copyright owner>
+# Tron - a server based multiplayer tron game for the web
+# Copyright (C) 2024 Dylan Ferrow
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -151,7 +151,7 @@ def game_loop(people, game_no, frame):  # TODO add trail removal
          to=f"{people}_player_game_{str(game_no)}")
     # TODO add kill and end check an score
     clock.tick(100)
-    if frame % 7 == 0:
+    if frame % 100 == 0:
         for player in games[people][game_no-1]["players"]:
             games[people][game_no-1]["players"][player]["trail"] = shorten_trail(
                 games[people][game_no-1]["players"][player]["trail"])
