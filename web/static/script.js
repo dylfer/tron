@@ -133,27 +133,35 @@ function load(mode) {
 // }
 
 function keydown(e) {
+  console.log(e.key);
   switch (e.key) {
     case "w":
       socket.emit("speed", { opration: "speed", speed: 2 });
+      break;
     case "a":
-      direction += 1;
-      if (direction > 3) {
-        direction = 0;
-      }
-      socket.emit("game_update", {
-        opration: "direction",
-        direction: directions[direction],
-      });
-    case "d":
       direction -= 1;
       if (direction < 0) {
         direction = 3;
       }
+      console.log("left", direction); // Add debugging log
+      console.log(directions);
       socket.emit("game_update", {
         opration: "direction",
-        direction: directions[direction],
+        direction: directions[direction], // ?? works somtimes ??
       });
+      break;
+    case "d":
+      direction += 1;
+      if (direction > 3) {
+        direction = 0;
+      }
+      console.log("right", direction); // Add debugging log
+      console.log(directions);
+      socket.emit("game_update", {
+        opration: "direction",
+        direction: directions[direction], // ?? works somtimes ??
+      });
+      break;
   }
 }
 
@@ -163,6 +171,7 @@ function keyup(e) {
       if (game_active) {
         socket.emit("speed", { opration: "speed", speed: 1 });
       }
+      break; // Add break here
   }
 }
 

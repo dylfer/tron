@@ -85,36 +85,29 @@ def shorten_trail(trail):
     return shortened_trail
 
 
-def chek_kill(coords, line):
-    """
-    Check if the specified line crosses any of the lines formed by the list of coordinates.
+def is_between(a, b, c):
+    return min(a, b) <= c <= max(a, b)
 
-    :param coords: List of tuples representing coordinates [(x1, y1), (x2, y2), ...]
-    :param line: Tuple representing the line to check against ((x1, y1), (x2, y2))
-    :return: True if the line crosses any of the lines formed by the coordinates, False otherwise
-    """
-    def is_between(a, b, c):
-        """Check if point c is between point a and b"""
-        return min(a, b) <= c <= max(a, b)
 
-    def lines_intersect(line1, line2):
-        """Check if two lines intersect"""
-        (x1, y1), (x2, y2) = line1
-        (x3, y3), (x4, y4) = line2
+def lines_intersect(line1, line2):
+    (x1, y1), (x2, y2) = line1
+    (x3, y3), (x4, y4) = line2
 
-        if x1 == x2:  # line1 is vertical
-            if x3 == x4:  # line2 is also vertical
-                return x1 == x3 and (is_between(y1, y2, y3) or is_between(y1, y2, y4))
-            else:  # line2 is horizontal
-                return is_between(y3, y4, y1) and is_between(x1, x2, x3)
-        else:  # line1 is horizontal
-            if x3 == x4:  # line2 is vertical
-                return is_between(x1, x2, x3) and is_between(y1, y2, y3)
-            else:  # line2 is also horizontal
-                return y1 == y3 and (is_between(x1, x2, x3) or is_between(x1, x2, x4))
+    if x1 == x2:  # line1 is vertical
+        if x3 == x4:  # line2 is also vertical
+            return x1 == x3 and (is_between(y1, y2, y3) or is_between(y1, y2, y4))
+        else:  # line2 is horizontal
+            return is_between(y3, y4, y1) and is_between(x1, x2, x3)
+    else:  # line1 is horizontal
+        if x3 == x4:  # line2 is vertical
+            return is_between(x1, x2, x3) and is_between(y1, y2, y3)
+        else:  # line2 is also horizontal
+            return y1 == y3 and (is_between(x1, x2, x3) or is_between(x1, x2, x4))
 
-    for i in range(len(coords) - 1):
-        if lines_intersect(line, (coords[i], coords[i + 1])):
+
+def check_kill(trail, tip):
+    for i in range(len(trail) - 1):
+        if lines_intersect((trail[i], trail[i + 1]), (tip[0], tip[1])):
             return True
     return False
 
@@ -135,10 +128,10 @@ def game_loop(people, game_no, frame):  # TODO add trail removal
             games[people][game_no-1]["players"][player]["cord"][:])
     for player in games[people][game_no-1]["players"]:
         for player2 in games[people][game_no-1]["players"]:
-            # thare is a bug whare 1 or 2 pixels are not used in the kill check but it would take precice timing to pass thourgh anothers trail
-            if chek_kill(games[people][game_no-1]["players"][player]["trail"][:-2], games[people][game_no-1]["players"][player2]["trail"][-2:]):
-                # del games[people][game_no-1]["players"][player] create a fnction to kill player
-                emit("game_update", {"opration": "kill", "user": player},
+            # there is a bug where 1 or 2 pixels are not used in the kill check but it would take precise timing to pass through another's trail
+            if check_kill(games[people][game_no-1]["players"][player]["trail"][:-2], games[people][game_no-1]["players"][player2]["trail"][-2:]):
+                # del games[people][game_no-1]["players"][player] create a function to kill player
+                emit("game_update", {"operation": "kill", "user": player},
                      to=f"{people}_player_game_{str(game_no)}")
                 if people == 2:
                     end(people, game_no)
@@ -147,9 +140,9 @@ def game_loop(people, game_no, frame):  # TODO add trail removal
                     end(people, game_no)
                     return False, frame
 
-    emit("game_update", {"opration": "update", "data": games[people][game_no-1]["players"]},
+    emit("game_update", {"operation": "update", "data": games[people][game_no-1]["players"]},
          to=f"{people}_player_game_{str(game_no)}")
-    # TODO add kill and end check an score
+    # TODO add kill and end check and score
     clock.tick(100)
     if frame % 100 == 0:
         for player in games[people][game_no-1]["players"]:
@@ -310,11 +303,18 @@ def handle_message(data):
     """event listener for when client sends data"""
     match(data["opration"]):  # change to rooms brodcast
         case "direction":
-            # print(rooms())
-            if games[int(rooms()[1][0])][int(rooms()[1][-1])-1]["players"][request.sid]["direction"] == ("up" or "down") and data["direction"] == ("down" or "up") or games[int(rooms()[1][0])][int(rooms()[1][-1])-1]["players"][request.sid]["direction"] == ("left" or "right") and data["direction"] == ("right" or "left"):
-                emit("invalid", {"opration": "invalid direction"},)
-            games[int(rooms()[1][0])][int(rooms()[1][-1])-1]["players"][request.sid].update(
-                {"direction": data["direction"]})
+            current_direction = games[int(rooms()[1][0])][int(
+                rooms()[1][-1])-1]["players"][request.sid]["direction"]
+            new_direction = data["direction"]
+
+            # Check if the new direction is perpendicular to the current direction
+            if (current_direction in ["up", "down"] and new_direction in ["left", "right"]) or \
+               (current_direction in ["left", "right"] and new_direction in ["up", "down"]):
+                games[int(rooms()[1][0])][int(rooms()[1][-1]) -
+                                          1]["players"][request.sid]["direction"] = new_direction
+            else:
+                emit("invalid", {"opration": "invalid direction"})
+
         case "speed":
             if data["speed"] not in [1, 2]:
                 emit("invalid", {"opration": "invalid speed"})
