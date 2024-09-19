@@ -445,11 +445,11 @@ def disconnected():
     for queue in queues:
         if request.sid in queues[queue]:
             queues[queue].remove(request.sid)
-    for game in games:
-        for player in games[game]:
-            if request.sid in games[game][player]["players"]:
+    for players in games:
+        for g in games[players]["players"]:
+            if request.sid in games[players][g]["players"].keys():
                 # send player disconect request
-                del games[game][player]["players"][request.sid]
+                del games[players][g]["players"][request.sid]
     print("user disconnected")
     emit("disconnect", f"user {request.sid} disconnected", broadcast=True)
 
