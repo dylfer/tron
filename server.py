@@ -76,7 +76,7 @@ def shorten_trail(trail):
 
         # Add coordinate if direction changes
         if direction != current_direction:
-            shortened_trail.append(curr_coord)
+            shortened_trail.append(prev_coord)
             current_direction = direction
 
     # Add the last 3 coordinates
