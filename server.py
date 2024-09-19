@@ -61,14 +61,18 @@ def shorten_trail(trail):
         curr_coord = trail[i]
 
         # Determine the direction
-        if curr_coord[0] == prev_coord[0] and curr_coord[1] >= prev_coord[1]:
-            direction = 1
-        elif curr_coord[0] == prev_coord[0] and curr_coord[1] <= prev_coord[1]:
-            direction = 2
-        elif curr_coord[1] == prev_coord[1] and curr_coord[0] >= prev_coord[0]:
-            direction = 3
+        if curr_coord[0] == prev_coord[0]:  # Vertical movement
+            if curr_coord[1] > prev_coord[1]:
+                direction = 'down'
+            else:
+                direction = 'up'
+        elif curr_coord[1] == prev_coord[1]:  # Horizontal movement
+            if curr_coord[0] > prev_coord[0]:
+                direction = 'right'
+            else:
+                direction = 'left'
         else:
-            direction = 4
+            continue  # Skip diagonal movements
 
         # Add coordinate if direction changes
         if direction != current_direction:
