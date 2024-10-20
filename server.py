@@ -460,4 +460,5 @@ def recived():
 
 if __name__ == '__main__':
     # context = ('cert.pem', 'key.pem')
-    socketio.run(app, host="0.0.0.0", port=80)  # ,ssl_context=context)
+    # ,ssl_context=context)
+    socketio.run(app, host="0.0.0.0", port=80, debug=True)

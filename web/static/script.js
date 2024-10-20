@@ -246,11 +246,12 @@ window.onload = function () {
     // console.log("update");
     if (data.opration == "end") {
       setScreen("end");
-      end_game();
+      end_game(data);
     } else if (data.opration == "kill") {
       console.log("dead");
+      kill(data.user);
       alert("end");
-      window.location.reload();
+      // window.location.reload();
     } else {
       // console.log("movement");
       game = data.data;
@@ -273,6 +274,29 @@ window.onload = function () {
       screens.game.focus();
       screens.game.addEventListener("keydown", keydown);
       screens.game.addEventListener("keyup", keyup);
+    } else {
+      if (data.opration == "1") {
+        Swal.fire({
+          position: "top",
+          width: "10%",
+          customClass: {
+            popup: "mt-20",
+          },
+          title: `${data.opration}`,
+          showConfirmButton: false,
+          timer: 500,
+        });
+      }
+      Swal.fire({
+        position: "top",
+        width: "10%",
+        customClass: {
+          popup: "mt-20",
+        },
+        title: `${data.opration}`,
+        showConfirmButton: false,
+        timer: 900,
+      });
     }
     // alert(`starting in ${data.secconds}`); // make it a custom alert (overlay)
   });
