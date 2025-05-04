@@ -14,25 +14,37 @@ run server.py using python
  - [ ] images - leagal ??
 
 python
-- [ ] check if a game is being prepared and can alow for more to join 
+- [ ] check if a game is being prepared and can alow for more to join (4 player)
 - [ ] make sure sid is not the same as other player (refrech page)
 - [x] add the game loop
-- [ ] add death
+- [x] add death
+- [ ] add stats
 - [ ] add game end
-- [ ] add lobbies (easy)
+- [ ] add lobbies 
 - [ ] add outer wall checks 
 - [ ] leaderboard
+- [ ] fix speed action
+- [ ] save games?
+- [ ] replay games?
+- [ ] accounts?
 
 javascript
 - [ ] alert overlay (use sweetalert2)
 - [ ] finish server coms routing for game loop 
 - [ ] add death
+- [x] explosion on death
+- [ ] add stats
 - [ ] add game end 
-- [ ] add  fliped view 
-- [ ] add icon rotation
+- [ ] add  flipped view 
+- [x] add bike rotation
 - [ ] fix trails
 - [ ] leaderboard
 - [ ] single player
+- [ ] local 2 player
+- [ ] replay games?
+- [ ] accounts?
+- [ ] fix incorrect first direction action (conditional)
+- [ ] opponent bike orientation ?
 
 
 

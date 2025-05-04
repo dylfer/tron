@@ -24,6 +24,8 @@ let player1 = new Image();
 player1.src = "/player1.png";
 let player2 = new Image();
 player2.src = "/player2.png";
+let explosion = new Image();
+explosion.src = "/explosion.png";
 let stage = "menu";
 // let trails = []; // sent by server
 // let cords = []; // sent by server
@@ -34,19 +36,14 @@ let conected = false;
 let disconected = false;
 let lobby_creator = false;
 let last_view; // more presise version of stage for lobby views
-let directions = ["up", "right", "down", "left"];
-let direction = 1;
+let directions = ["right", "down", "left", "up"];
+let direction = 0;
 let game_active = false;
 let reverse = false; // so evreyone is on the left side of the screen
 
 ///////////////
 
 let lobby_hidden = true;
-// let menu;
-// let lobby;
-// let game;
-// let end;
-// let starting;
 let starting_info;
 let code_join_section;
 let lobby_name_section;
@@ -54,11 +51,11 @@ let lobby_joined_section;
 let join_code;
 let username;
 let screens = {
-  menu: menu,
-  lobby: lobby,
-  game: game,
-  end: end,
-  starting: starting,
+  menu: null,
+  lobby: null,
+  game: null,
+  end: null,
+  starting: null,
 };
 
 ///////////////
@@ -109,6 +106,56 @@ function draw_grid() {
   ctx.moveTo(canvas.width, canvas.height);
   ctx.lineTo(canvas.width, 0);
   ctx.stroke();
+}
+
+function explode(cord, frame, explosion_background = null) {
+  if (explosion_background != null) {
+    ctx.putImageData(explosion_background, 0, 0);
+  } else {
+    ctx.clearRect(cord[0] - 60 / 2, cord[1] - 60 / 2, 60, 60); // Clear the area before drawing the image
+  }
+  y = 0;
+  y = Math.floor(frame / 8);
+  ctx.drawImage(
+    explosion,
+    (frame % 8) * 257.5 + 25,
+    y * 257.5 + 20,
+    220,
+    220,
+    cord[0] - 60 / 2,
+    cord[1] - 60 / 2,
+    60,
+    60
+  );
+  if (frame >= 48) {
+    return;
+  }
+  setTimeout(() => {
+    explode(cord, frame + 1, explosion_background);
+  }, 25);
+}
+
+function kill(user) {
+  if (Object.keys(game).length == 2) {
+    explosion_background = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    explode(game[user].cord, 0, explosion_background);
+  } else {
+    explode(game[user].cord, 0);
+  }
+  if (user == socket.id) {
+    Swal.fire({
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      position: "top",
+      width: "10%",
+      customClass: {
+        popup: "mt-20",
+      },
+      confirmButtonText: "View game",
+      title: `You died`,
+      timer: 900,
+    });
+  }
 }
 
 function end_game() {}
@@ -199,9 +246,19 @@ function draw() {
 
   for (const id in game) {
     if (id == socket.id) {
-      ctx.drawImage(player1, game[id].cord[0], game[id].cord[1] - 5, 30, 10);
+      ctx.save(); // Save the current state
+      ctx.translate(game[id].cord[0], game[id].cord[1]); // Move to the player's position
+      ctx.rotate((direction * Math.PI) / 2); // Rotate based on direction
+      console.log(direction);
+      ctx.drawImage(player1, -10, -10, 60, 20); // Draw the image centered at the position
+      ctx.restore(); // Restore the original state
     } else {
-      ctx.drawImage(player2, game[id].cord[0], game[id].cord[1] - 5, 30, 10);
+      ctx.save(); // Save the current state
+      ctx.translate(game[id].cord[0], game[id].cord[1]); // Move to the player's position
+      ctx.rotate((directions.indexOf(game[id].direction) * Math.PI) / 2); // Rotate based on direction
+      console.log(directions.indexOf(game[id].direction));
+      ctx.drawImage(player2, -10, -10, 60, 20); // Draw the image centered at the position
+      ctx.restore(); // Restore the original state
     }
   }
 }
@@ -243,20 +300,21 @@ window.onload = function () {
   });
 
   socket.on("game_update", (data) => {
-    // console.log("update");
-    if (data.opration == "end") {
+    if (data.operation == "end") {
+      game_active = false;
       setScreen("end");
       end_game(data);
-    } else if (data.opration == "kill") {
+    } else if (data.operation == "kill") {
       console.log("dead");
       kill(data.user);
-      alert("end");
       // window.location.reload();
-    } else {
+    } else if (data.operation == "update") {
       // console.log("movement");
       game = data.data;
       lastUpdate = Date.now();
       update();
+    } else {
+      alert("error: " + data.operation); // make it a custom alert (overlay)
     }
   });
 
@@ -269,7 +327,7 @@ window.onload = function () {
 
     if (data.opration == "0") {
       game_active = true;
-      direction = 1;
+      direction = 0;
       console.log(screens.game);
       screens.game.focus();
       screens.game.addEventListener("keydown", keydown);
