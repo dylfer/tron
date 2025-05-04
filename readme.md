@@ -16,6 +16,9 @@ run server.py using python
 python
 - [ ] check if a game is being prepared and can alow for more to join (4 player)
 - [ ] make sure sid is not the same as other player (refrech page)
+- [ ] fix disconect sid errors
+- [ ] fix game que sid errors 
+- [ ] fix game matching errors
 - [x] add the game loop
 - [x] add death
 - [ ] add stats
