@@ -28,6 +28,7 @@ import json
 import os
 import time
 import pygame
+import hashlib
 # use time to ajust the game clock for error in time
 
 app = Flask(__name__,
@@ -38,6 +39,7 @@ app.config['SECRET_KEY'] = 'secret!'
 CORS(app, resources={r"/*": {"origins": "*"}})
 socketio = SocketIO(app, cors_allowed_origins="*")
 
+admin = {"id": "", "username": "", "update": False}
 clients = {}
 games = {2: [], 4: []}  # active games and players
 # game modes just to keep pleayer count
@@ -45,6 +47,7 @@ modes = {"2_player": [], "4_player": []}
 queues = {"2_player": [], "4_player": []}
 lobbies = {}  # lobbies, rooms, players and settings
 clock = pygame.time.Clock()
+badwords = []
 
 
 # game logic
@@ -113,36 +116,41 @@ def check_kill(trail, tip):
 
 
 def game_loop(people, game_no, frame):  # TODO add trail removal
+    games[people][game_no-1]["frame"] = frame
     for player in games[people][game_no-1]["players"]:
-        speed = games[people][game_no-1]["players"][player]["speed"]
-        match games[people][game_no-1]["players"][player]["direction"]:
-            case "up":
-                games[people][game_no-1]["players"][player]["cord"][1] -= speed
-            case "down":
-                games[people][game_no-1]["players"][player]["cord"][1] += speed
-            case "left":
-                games[people][game_no-1]["players"][player]["cord"][0] -= speed
-            case "right":
-                games[people][game_no-1]["players"][player]["cord"][0] += speed
-        games[people][game_no - 1]["players"][player]["trail"].append(
-            games[people][game_no-1]["players"][player]["cord"][:])
+        if not games[people][game_no-1]["players"][player]["dead"]:
+            speed = games[people][game_no-1]["players"][player]["speed"]
+            match games[people][game_no-1]["players"][player]["direction"]:
+                case "up":
+                    games[people][game_no-1]["players"][player]["cord"][1] -= speed
+                case "down":
+                    games[people][game_no-1]["players"][player]["cord"][1] += speed
+                case "left":
+                    games[people][game_no-1]["players"][player]["cord"][0] -= speed
+                case "right":
+                    games[people][game_no-1]["players"][player]["cord"][0] += speed
+            games[people][game_no - 1]["players"][player]["trail"].append(
+                games[people][game_no-1]["players"][player]["cord"][:])
     for player in games[people][game_no-1]["players"]:
         for player2 in games[people][game_no-1]["players"]:
             # there is a bug where 1 or 2 pixels are not used in the kill check but it would take precise timing to pass through another's trail
             if check_kill(games[people][game_no-1]["players"][player]["trail"][:-2], games[people][game_no-1]["players"][player2]["trail"][-2:]):
                 # del games[people][game_no-1]["players"][player] create a function to kill player
+                games[people][game_no-1]["players"][player2]["dead"] = True
                 emit("game_update", {"operation": "kill", "user": player2},
                      to=f"{people}_player_game_{str(game_no)}")
                 if people == 2:
                     end(people, game_no)
                     return False, frame
-                elif people == 4 and len(games[people][game_no-1]["players"]) == 1:
+                elif people == 4 and sum(1 for player in games[people][game_no-1]["players"].values() if not player["dead"]) == 1:
                     end(people, game_no)
                     return False, frame
+                else:
+                    pass  # TODO check if game end for larger groops/lobbies
 
     emit("game_update", {"operation": "update", "data": games[people][game_no-1]["players"]},
          to=f"{people}_player_game_{str(game_no)}")
-    # TODO add kill and end check and score
+    # TODO add score
     clock.tick(100)
     if frame % 100 == 0:
         for player in games[people][game_no-1]["players"]:
@@ -245,16 +253,18 @@ def matching(players, sid):
 
 def start(people, game_no):  # count down then start game
     for i in range(5):
-        emit("starting", {"opration": f"starting {5-i}"},
+        emit("starting", {"operation": f"starting {5-i}"},
              to=f"{people}_player_game_{str(game_no)}")
         time.sleep(1)
-    emit("start", {"opration": "4"}, to=f"{people}_player_game_{str(game_no)}")
+    emit("start", {"operation": "4"},
+         to=f"{people}_player_game_{str(game_no)}")
     time.sleep(1)
     for i in range(3):
-        emit("start", {"opration": f"{3-i}"},
+        emit("start", {"operation": f"{3-i}"},
              to=f"{people}_player_game_{str(game_no)}")
         time.sleep(1)
-    emit("start", {"opration": "0"}, to=f"{people}_player_game_{str(game_no)}")
+    emit("start", {"operation": "0"},
+         to=f"{people}_player_game_{str(game_no)}")
     # TODO set starting cordonates
     i = 0
     cords = generate_coordinates(people)
@@ -277,9 +287,44 @@ def loop_run(people, game_no, frame):
         alive, frame = game_loop(people, game_no, frame)
 
 
+def clear_game(people, game_no):
+    time.sleep(180)
+    if games[people][game_no-1]["state"] == "end":
+        del games[people][game_no-1]
+        close_room(f"{people}_player_game_{str(game_no)}")
+
+
 def end(people, game_no):
-    pass
-    close_room(f"{people}_player_game_{str(game_no)}")
+    modes[f"{people}_player"].remove(
+        request.sid)
+    games[people][game_no-1].update({"state": "end"})
+    for player in games[people][game_no-1]["players"]:
+        clients[player].update({"status": "end"})
+    emit("game_update", {"operation": "end"},
+         to=f"{people}_player_game_{str(game_no)}")
+    clear_game(people, game_no)
+    # TODO add score and rematch logic
+
+
+def admin_update_loop():
+    while True:
+        if admin["update"]:
+            emit("admin_update", {"operation": "update",
+                                  "games": games, "clients": clients}, to=admin["id"])
+        time.sleep(0.1)
+
+
+def admin_view_game(game_name):  # from game or folow player
+    admin["update"] = False
+    join_room(game_name, admin["id"])
+
+
+def admin_end_game():
+    pass  # end game with reason admin
+
+
+def admin_kill_player():
+    pass  # kill player with reason admin
 
 # server end points
 
@@ -301,7 +346,7 @@ def connected():
 @socketio.on('game_update')
 def handle_message(data):
     """event listener for when client sends data"""
-    match(data["opration"]):  # change to rooms brodcast
+    match(data["operation"]):  # change to rooms brodcast
         case "direction":
             current_direction = games[int(rooms()[1][0])][int(
                 rooms()[1][-1])-1]["players"][request.sid]["direction"]
@@ -313,11 +358,11 @@ def handle_message(data):
                 games[int(rooms()[1][0])][int(rooms()[1][-1]) -
                                           1]["players"][request.sid]["direction"] = new_direction
             else:
-                emit("invalid", {"opration": "invalid direction"})
+                emit("invalid", {"operation": "invalid direction"})
 
         case "speed":
             if data["speed"] not in [1, 2]:
-                emit("invalid", {"opration": "invalid speed"})
+                emit("invalid", {"operation": "invalid speed"})
             games[rooms()[1][0]][rooms()[1][-1]]["players"][request.sid].update(
                 {"speed": data["speed"]})
         # case "inactive":
@@ -331,32 +376,38 @@ def handle_message(data):
 @socketio.on("play")
 def play(data):
     print(data)
+    hashed_username = [hashlib.sha256(
+        word.encode()).hexdigest() for word in data["username"].split()]
+    if any(word in badwords for word in hashed_username):
+        emit("error", {"operation": "inappropriate username"})
+        return
+    clients[request.sid].update({"username": data["username"]})
     match data["mode"]:
         case "2_player":
             clients[request.sid].update({"status": "play_que", "mode": 2})
             # modes["2_player"].append(request.sid)
-            emit("starting", {"opration": "matching"})
+            emit("starting", {"operation": "matching"})
             action, other = matching(2, request.sid)
             match action:
                 case 0:  # waiting
-                    emit("starting", {"opration": other})
+                    emit("starting", {"operation": other})
                 case 1:
                     game_no = len(games[2])+1
                     join_room(f"2_player_game_{str(game_no)}")
                     join_room(f"2_player_game_{str(game_no)}",
                               queues["2_player"][0])
                     games[2].append({"players": {}, "settings": {
-                    }, "state": "creating", "roon": f"2_player_game_{str(game_no)}"})
+                    }, "state": "creating", "room": f"2_player_game_{str(game_no)}", "frame": 0})
                     # more for the player atributes in the game data?
                     games[2][game_no-1]["players"].update(
-                        {queues["2_player"][0]: {"cord": [], "trail": [], "speed": 1, "direction": "right"}})
+                        {queues["2_player"][0]: {"cord": [], "trail": [], "speed": 1, "direction": "right", "username": clients[queues["2_player"][0]]["username"], "dead": False}})
                     games[2][game_no-1]["players"].update(
-                        {request.sid: {"cord": [], "trail": [], "speed": 1, "direction": "right"}})
+                        {request.sid: {"cord": [], "trail": [], "speed": 1, "direction": "right", "username": data["username"], "dead": False}})
                     queues["2_player"].pop(0)
                     for id in games[2][game_no-1]["players"]:
                         clients[id].update({"status": "preparing_game"})
                     emit("starting", {
-                        "opration": "preparing game"}, to=f"2_player_game_{str(game_no)}")
+                        "operation": "preparing game"}, to=f"2_player_game_{str(game_no)}")
                     start(2, game_no)
                 case 2:  # match with 4 player
                     game_no = len(games[2])+1
@@ -364,26 +415,26 @@ def play(data):
                     join_room(f"2_player_game_{str(game_no)}",
                               queues["4_player"][0])
                     games[2].append({"players": {}, "settings": {
-                    }, "state": "creating", "roon": f"2_player_game_{str(game_no)}"})
+                    }, "state": "creating", "room": f"2_player_game_{str(game_no)}", "frame": 0})
                     # more for the player atributes in the game data?
                     games[2][game_no-1]["players"].update(
-                        {queues["4_player"][0]: {"cord": [], "trail": [], "speed": 1, "direction": "right"}})
+                        {queues["4_player"][0]: {"cord": [], "trail": [], "speed": 1, "direction": "right", "username": clients[queues["4_player"][0]]["username"], "dead": False}})
                     games[2][game_no-1]["players"].update(
-                        {request.sid: {"cord": [], "trail": [], "speed": 1, "direction": "right"}})
+                        {request.sid: {"cord": [], "trail": [], "speed": 1, "direction": "right", "username": data["username"], "dead": False}})
                     queues["4_player"].pop(0)
                     for id in games[2][game_no-1]["players"]:
                         clients[id].update({"status": "preparing_game"})
                     emit("starting", {
-                        "opration": "preparing game"}, to=f"2_player_game_{str(game_no)}")
+                        "operation": "preparing game"}, to=f"2_player_game_{str(game_no)}")
                     start(2, game_no)
         case "4_player":
             clients[request.sid].update({"status": "play_que", "mode": 4})
             # modes["4_player"].append(request.sid)
-            emit("starting", {"opration": "matching "})
+            emit("starting", {"operation": "matching "})
             action, other = matching(4, request.sid)
             match action:
                 case 0:  # waiting
-                    emit("starting", {"opration": other})
+                    emit("starting", {"operation": other})
                 case 1:
                     game_no = len(games[4])+1
                     join_room(f"4_player_game_{str(game_no)}")
@@ -391,19 +442,19 @@ def play(data):
                         join_room(f"4_player_game_{str(game_no)}",
                                   id)
                     games[4].append({"players": {}, "settings": {
-                    }, "state": "creating", "roon": f"4_player_game_{str(game_no)}"})
+                    }, "state": "creating", "room": f"4_player_game_{str(game_no)}", "frame": 0})
                     for id in queues["4_player"][:2]:
                         # more for the player atributes in the game data?
                         games[4][game_no-1]["players"].update(
-                            {id: {"cord": [], "trail": [], "speed": 1, "direction": "right"}})
+                            {id: {"cord": [], "trail": [], "speed": 1, "direction": "right", "username": clients[id]["username"], "dead": False}})
                     games[4][game_no-1]["players"].update(
-                        {request.sid: {"cord": [], "trail": [], "speed": 1, "direction": "right"}})
+                        {request.sid: {"cord": [], "trail": [], "speed": 1, "direction": "right", "username": data["username"], "dead": False}})
 
                     for _ in queues["4_player"][:2]:
                         queues["4_player"].pop(0)
                     for id in games[4][game_no-1]["players"]:
                         clients[id].update({"status": "preparing_game"})
-                    emit("starting", {"opration": "preparing game"},
+                    emit("starting", {"operation": "preparing game"},
                          to=f"4_player_game_{str(game_no)}")
                     start(4, game_no)
                 case 2:  # match with 2 player
@@ -412,17 +463,17 @@ def play(data):
                     join_room(f"2_player_game_{str(game_no)}",
                               queues["2_player"][0])
                     games[2].append({"players": {}, "settings": {
-                    }, "state": "creating", "roon": f"2_player_game_{str(game_no)}"})
+                    }, "state": "creating", "room": f"2_player_game_{str(game_no)}", "frame": 0})
                     # more for the player atributes in the game data?
                     games[2][game_no-1]["players"].update(
-                        {queues["2_player"][0]: {"cord": [], "trail": [], "speed": 1, "direction": "right"}})
+                        {queues["2_player"][0]: {"cord": [], "trail": [], "speed": 1, "direction": "right", "username": clients[queues["2_player"][0]]["username"], "dead": False}})
                     games[2][game_no-1]["players"].update(
-                        {request.sid: {"cord": [], "trail": [], "speed": 1, "direction": "right"}})
+                        {request.sid: {"cord": [], "trail": [], "speed": 1, "direction": "right", "username": data["username"], "dead": False}})
                     queues["2_player"].pop(0)
                     for id in games[2][game_no-1]["players"]:
                         clients[id].update({"status": "preparing_game"})
                     emit("starting", {
-                        "opration": "preparing game"}, to=f"2_player_game_{str(game_no)}")
+                        "operation": "preparing game"}, to=f"2_player_game_{str(game_no)}")
                     start(2, game_no)
 
         case "create_lobby":
@@ -432,7 +483,23 @@ def play(data):
         case _:
             pass
 
-    # emit("play", {"data": data, "id": request.sid}, broadcast=True)
+    # emit("play", {"data": data, "id": request.sid}, broadcast=True)#
+
+
+@socketio.on("admin")
+def admin(data):
+    match data["operation"]:
+        case "login":
+            pass
+        case "view_game":
+            # add admin to room
+            pass
+        case "end_game":
+            # end game with reason admin
+            pass
+        case "kill_player":
+            # kill player with reason admin
+            pass
 
 
 @socketio.on("disconnect")
@@ -459,6 +526,8 @@ def recived():
 
 
 if __name__ == '__main__':
+    with open("badwords.json", "r") as f:
+        badwords = json.load(f)
     # context = ('cert.pem', 'key.pem')
     # ,ssl_context=context)
     socketio.run(app, host="0.0.0.0", port=80, debug=True)

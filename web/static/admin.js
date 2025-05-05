@@ -579,33 +579,33 @@ function end_game() {
       confirmButtonText: "Next",
       title: `You died`,
       html: `
-      <div class="flex w-full justify-center items-center space-x-8">
-        <div class="flex flex-col items-center p-5 bg-gray-700 rounded-lg shadow-md">
-        <h2 class="text-lg font-semibold  text-red-400">Your Stats</h2>
-        <p class="mt-2">Username: <span class="font-bold">${
-          game[socket.id].username
-        }</span></p>
-        <p>Games Won: <span class="font-bold text-green-400">${
-          game[socket.id].gamesWon || 0
-        }</span></p>
-        <p>Games Lost: <span class="font-bold text-red-400">${
-          game[socket.id].gamesLost || 0
-        }</span></p>
+        <div class="flex w-full justify-center items-center space-x-8">
+          <div class="flex flex-col items-center p-5 bg-gray-700 rounded-lg shadow-md">
+          <h2 class="text-lg font-semibold  text-red-400">Your Stats</h2>
+          <p class="mt-2">Username: <span class="font-bold">${
+            game[socket.id].username
+          }</span></p>
+          <p>Games Won: <span class="font-bold text-green-400">${
+            game[socket.id].gamesWon || 0
+          }</span></p>
+          <p>Games Lost: <span class="font-bold text-red-400">${
+            game[socket.id].gamesLost || 0
+          }</span></p>
+          </div>
+          <div class="flex flex-col items-center p-5 bg-gray-700 rounded-lg shadow-md">
+          <h2 class="text-lg font-semibold  text-green-400">Opponent Stats</h2>
+          <p class="mt-2">Username: <span class="font-bold">${
+            game[opponentId].username
+          }</span></p>
+          <p>Games Won: <span class="font-bold text-green-400">${
+            game[opponentId].gamesWon || 0
+          }</span></p>
+          <p>Games Lost: <span class="font-bold text-red-400">${
+            game[opponentId].gamesLost || 0
+          }</span></p>
+          </div>
         </div>
-        <div class="flex flex-col items-center p-5 bg-gray-700 rounded-lg shadow-md">
-        <h2 class="text-lg font-semibold  text-green-400">Opponent Stats</h2>
-        <p class="mt-2">Username: <span class="font-bold">${
-          game[opponentId].username
-        }</span></p>
-        <p>Games Won: <span class="font-bold text-green-400">${
-          game[opponentId].gamesWon || 0
-        }</span></p>
-        <p>Games Lost: <span class="font-bold text-red-400">${
-          game[opponentId].gamesLost || 0
-        }</span></p>
-        </div>
-      </div>
-      `,
+        `,
     }).then((result) => {
       if (result.isConfirmed) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -626,33 +626,33 @@ function end_game() {
       confirmButtonText: "Next",
       title: `You won`,
       html: `
-      <div class="flex w-full justify-center items-center space-x-8">
-      <div class="flex flex-col items-center p-5 bg-gray-700 rounded-lg shadow-md">
-        <h2 class="text-lg font-semibold text-green-400">Your Stats</h2>
-        <p class="mt-2">Username: <span class="font-bold">${
-          game[socket.id].username
-        }</span></p>
-        <p>Games Won: <span class="font-bold text-green-400">${
-          game[socket.id].gamesWon || 0
-        }</span></p>
-        <p>Games Lost: <span class="font-bold text-red-400">${
-          game[socket.id].gamesLost || 0
-        }</span></p>
-      </div>
-      <div class="flex flex-col items-center p-5 bg-gray-700 rounded-lg shadow-md">
-        <h2 class="text-lg font-semibold text-red-400">Opponent Stats</h2>
-        <p class="mt-2">Username: <span class="font-bold">${
-          game[opponentId].username
-        }</span></p>
-        <p>Games Won: <span class="font-bold text-green-400">${
-          game[opponentId].gamesWon || 0
-        }</span></p>
-        <p>Games Lost: <span class="font-bold text-red-400">${
-          game[opponentId].gamesLost || 0
-        }</span></p>
-      </div>
-      </div>
-      `,
+        <div class="flex w-full justify-center items-center space-x-8">
+        <div class="flex flex-col items-center p-5 bg-gray-700 rounded-lg shadow-md">
+          <h2 class="text-lg font-semibold text-green-400">Your Stats</h2>
+          <p class="mt-2">Username: <span class="font-bold">${
+            game[socket.id].username
+          }</span></p>
+          <p>Games Won: <span class="font-bold text-green-400">${
+            game[socket.id].gamesWon || 0
+          }</span></p>
+          <p>Games Lost: <span class="font-bold text-red-400">${
+            game[socket.id].gamesLost || 0
+          }</span></p>
+        </div>
+        <div class="flex flex-col items-center p-5 bg-gray-700 rounded-lg shadow-md">
+          <h2 class="text-lg font-semibold text-red-400">Opponent Stats</h2>
+          <p class="mt-2">Username: <span class="font-bold">${
+            game[opponentId].username
+          }</span></p>
+          <p>Games Won: <span class="font-bold text-green-400">${
+            game[opponentId].gamesWon || 0
+          }</span></p>
+          <p>Games Lost: <span class="font-bold text-red-400">${
+            game[opponentId].gamesLost || 0
+          }</span></p>
+        </div>
+        </div>
+        `,
     }).then((result) => {
       if (result.isConfirmed) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -770,14 +770,34 @@ function draw() {
 
 ///////////////
 
-window.onload = function () {
-  let storedUsername = localStorage.getItem("username");
-  if (storedUsername) {
-    document.getElementById("username").value = storedUsername;
-  } else {
-    document.getElementById("username").value =
-      default_names[Math.floor(Math.random() * default_names.length)];
+function display_games(games) {
+  const gamesList = document.getElementById("admin-games");
+  gamesList.innerHTML = "";
+  for (const people of games) {
+    for (let game_no = 0; game_no < games[people].length; game_no++) {
+      const div = document.createElement("div");
+      div.innerHTML = `<span>${games[people][game_no].room}}</span><span>${people}_player</span><span>${games[people][game_no].state}</span>
+                <span>${games[people][game_no].players.length}</span><span>${games[people][game_no].frame}</span><span>payers alive</span>`;
+      gamesList.appendChild(div);
+    }
   }
+}
+
+function display_clients(clients) {
+  const clientsList = document.getElementById("admin-clients");
+  clientsList.innerHTML = "";
+  for (const client of clients) {
+    const div = document.createElement("div");
+    div.innerHTML = `<span>${client}</span><span>${clients[client].username}</span><span>${clients[client].status}</span
+            ><span>${clients[client].mode}</span>`;
+    clientsList.appendChild(div);
+  }
+}
+
+///////////////
+
+window.onload = function () {
+  document.getElementById("username").value = "admin";
   canvas = document.getElementById("game");
   canvas.width = 1500;
   canvas.height = 800;
@@ -809,6 +829,13 @@ window.onload = function () {
     alert("disconnected"); // make it a custom alert (overlay)
     conected = false;
     disconected = true;
+  });
+
+  socket.on("admin_update", (data) => {
+    if (data.operation == "update") {
+      display_games(data.games);
+      display_clients(data.clients);
+    }
   });
 
   socket.on("game_update", (data) => {

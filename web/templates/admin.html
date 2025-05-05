@@ -10,6 +10,28 @@
     <!-- <link href="stlye.css" rel="stylesheet" type="text/css" /> -->
   </head>
   <body class="dark bg-slate-800 text-center text-white">
+    <!--TODO get code from server-->
+    <div id="admin" class="hidden flex flex-col">
+      <h1 class="text-3xl">Admin</h1>
+      <div class="flex">
+        <div class="flex flex-col border-r-4 border-black">
+          <div class="flex">
+            <span>Game id</span><span>mode</span><span>state</span>
+            <span>players</span><span>frame</span><span>payers alive</span>
+          </div>
+          <div class="flex flex-col" id="admin-games"></div>
+        </div>
+        <div class="flex flex-col">
+          <div class="flex">
+            <span>Client id</span><span>username</span><span>status</span
+            ><span>game</span>
+          </div>
+          <div class="flex flex-col" id="admin-clients"></div>
+        </div>
+      </div>
+    </div>
+    <div id="login"></div>
+    <!-- TODO move menu into admin page -->
     <div class="flex flex-col" id="menu">
       <h1 class="text-3xl">Tron light cycles</h1>
       <span>
