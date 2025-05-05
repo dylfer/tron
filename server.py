@@ -97,10 +97,10 @@ def lines_intersect(line1, line2):
         if x3 == x4:  # line2 is also vertical
             return x1 == x3 and (is_between(y1, y2, y3) or is_between(y1, y2, y4))
         else:  # line2 is horizontal
-            return is_between(y3, y4, y1) and is_between(x1, x2, x3)
+            return is_between(y1, y2, y3) and (is_between(x1, x2, x3) or is_between(x1, x2, x4))
     else:  # line1 is horizontal
         if x3 == x4:  # line2 is vertical
-            return is_between(x1, x2, x3) and is_between(y1, y2, y3)
+            return is_between(x1, x2, x3) and (is_between(y1, y2, y3) or is_between(y1, y2, y4))
         else:  # line2 is also horizontal
             return y1 == y3 and (is_between(x1, x2, x3) or is_between(x1, x2, x4))
 
@@ -131,7 +131,7 @@ def game_loop(people, game_no, frame):  # TODO add trail removal
             # there is a bug where 1 or 2 pixels are not used in the kill check but it would take precise timing to pass through another's trail
             if check_kill(games[people][game_no-1]["players"][player]["trail"][:-2], games[people][game_no-1]["players"][player2]["trail"][-2:]):
                 # del games[people][game_no-1]["players"][player] create a function to kill player
-                emit("game_update", {"operation": "kill", "user": player},
+                emit("game_update", {"operation": "kill", "user": player2},
                      to=f"{people}_player_game_{str(game_no)}")
                 if people == 2:
                     end(people, game_no)
