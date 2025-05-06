@@ -18,409 +18,6 @@
 //
 //NOTE: this has only been used for personal use. i dont own the images used in this project, use them at your own risk, thy are not part of this license suplied with this project
 
-default_names = [
-  "dunnocksantander",
-  "skimellow",
-  "underfootflaxseed",
-  "maniacalmayor",
-  "suspendexultant",
-  "usemembrane",
-  "pleasurerecovery",
-  "hollowstammer",
-  "ratchetwax",
-  "pantiesoptic",
-  "everyadorable",
-  "receptiveuniversal",
-  "academicfrightened",
-  "shortstophart",
-  "zestyeffort",
-  "moltpushy",
-  "benchboundless",
-  "tightneck",
-  "faultmoon",
-  "racketsweltering",
-  "thoughvoracious",
-  "abuseeducated",
-  "testyasian",
-  "berserkscarf",
-  "couplesuch",
-  "abandonedlock",
-  "curlingvixen",
-  "lovercarrots",
-  "cycloneknock",
-  "chivespreserve",
-  "shadedintel",
-  "squirreltaunt",
-  "afflictguarantee",
-  "seasoncongregation",
-  "shellfishphantasmagoria",
-  "maddeningopinion",
-  "kennelglad",
-  "waterfowlwary",
-  "jurymastamazon",
-  "memorizegenoa",
-  "sledexpense",
-  "repeatyardarm",
-  "beneficenterror",
-  "aheadtotem",
-  "meerkatjoyful",
-  "wasworthy",
-  "includingfray",
-  "lethargicacoustic",
-  "polisheddrafty",
-  "paragonsomersault",
-  "undergosweatsuit",
-  "pugski",
-  "stalarrest",
-  "danceglaring",
-  "demureprotein",
-  "sheeprostrum",
-  "poiseddossier",
-  "abundantobese",
-  "universesplatter",
-  "importantmelody",
-  "dotterelscourge",
-  "comecolleague",
-  "beachirascible",
-  "wentelse",
-  "kaabataxidriver",
-  "christmastraffic",
-  "nationalunicorn",
-  "attributedisbelief",
-  "backwardovercooked",
-  "pizzaugliest",
-  "boyscoutshearty",
-  "extendcompetent",
-  "lilypadstudy",
-  "machineknight",
-  "superiorovercoat",
-  "minoritypleasure",
-  "cleanhundred",
-  "clumpgateau",
-  "recognizefinicky",
-  "mercurialproducer",
-  "clinicbeat",
-  "flatfootdye",
-  "musichope",
-  "busrockall",
-  "pecanschattering",
-  "pointlesssault",
-  "decisiveseason",
-  "worldprecious",
-  "spendingseamstress",
-  "spendobserve",
-  "roedeerbreezy",
-  "porkchopchimpanzee",
-  "spearheadalluring",
-  "textclamshell",
-  "dogsledlukewarm",
-  "discoverymodel",
-  "midsummerfuel",
-  "mailinfuriated",
-  "coniesregular",
-  "levitateprotection",
-  "lambglucose",
-  "savemagistrates",
-  "fickleshameless",
-  "garboardsweets",
-  "wakebillowy",
-  "sphericalhotdog",
-  "fateciabata",
-  "politeoccupation",
-  "busstoptone",
-  "grotesquemonorail",
-  "redocean",
-  "hijackatlas",
-  "plausiblecontend",
-  "roughguillemot",
-  "linepost",
-  "stickyinfielder",
-  "severswamp",
-  "lazulisugar",
-  "actdrink",
-  "passionattend",
-  "neighbormallet",
-  "trampolinenational",
-  "seapoet",
-  "pufferfishwig",
-  "depressionglorious",
-  "threelyrical",
-  "hasdecathlon",
-  "goringtweed",
-  "briefknit",
-  "rapidlybreeches",
-  "ploversrespond",
-  "blackjackstairs",
-  "mineshaftcrazy",
-  "jabmocha",
-  "kitchentreacle",
-  "acaciapristine",
-  "modescene",
-  "assessmentattached",
-  "kayakingclaus",
-  "paperclipsremuda",
-  "staidextralarge",
-  "accruephrase",
-  "yourshelter",
-  "skeletonizergybe",
-  "beliefscotch",
-  "butterfill",
-  "handsomemuseum",
-  "commondiamonds",
-  "ciabatalawyer",
-  "locateheld",
-  "colonialoptimistic",
-  "inspectcomparator",
-  "watercyandye",
-  "langmaidyour",
-  "rewardswanky",
-  "unselfishzombie",
-  "equatorialwellies",
-  "citepretzels",
-  "describegroggy",
-  "thrusheought",
-  "sunvigorous",
-  "cleanupexhort",
-  "chivepanda",
-  "lovesickcatch",
-  "bulletcaftan",
-  "inceptionlicense",
-  "detectorhuddle",
-  "impeccableplow",
-  "preachergoogle",
-  "perceptivevegan",
-  "abrasivemoney",
-  "fellbudget",
-  "forestercar",
-  "designingguacamole",
-  "outpostback",
-  "godlytangerine",
-  "tiaradrift",
-  "angelclockwork",
-  "documentjuggling",
-  "ibexehat",
-  "crashembarrass",
-  "museboo",
-  "pistonavow",
-  "rangalesniveling",
-  "quotientbellhop",
-  "nonchalantthrifty",
-  "feistyboth",
-  "portlandmagnet",
-  "idlestripped",
-  "turbulentmanage",
-  "rosemarywire",
-  "emeraldsoda",
-  "cannelloniboiled",
-  "sinkwide",
-  "gartersslither",
-  "shamelessactors",
-  "generositysnort",
-  "cucumbersnag",
-  "lugeveined",
-  "buckwheatexpansion",
-  "habitquick",
-  "jumpropeethereal",
-  "bonneteffective",
-  "recoveryominous",
-  "countybecause",
-  "laterjamaica",
-  "craftsmanmelons",
-  "understandfour",
-  "immodestmyth",
-  "greetleap",
-  "admonishabhorrent",
-  "pythonbrownies",
-  "surelywhimsical",
-  "jawboneubiquitous",
-  "luckyactivator",
-  "extollbroadcast",
-  "yieldingelated",
-  "caughtbollard",
-  "onlookerscame",
-  "matureshock",
-  "stronglybordered",
-  "fuelpumptank",
-  "enthralledtrunk",
-  "innocentlivid",
-  "offbeatidentify",
-  "remainthrowing",
-  "beginseal",
-  "fingerexposure",
-  "browniesundertaker",
-  "gratefulpolecats",
-  "trousersgrade",
-  "mailoptimistic",
-  "hournecktie",
-  "fountainpine",
-  "dunlinsedate",
-  "badgersaccomplish",
-  "advantagetransom",
-  "turbulentmeeting",
-  "steadyrate",
-  "thunderydeceit",
-  "flawlessburn",
-  "bestowdaylight",
-  "gracefulpoof",
-  "saddleden",
-  "onlookerpotential",
-  "previoushuman",
-  "returnargue",
-  "opponentcloak",
-  "tamarinblueeyed",
-  "gameelectric",
-  "foreignoctober",
-  "twomycelium",
-  "handiworkhorrible",
-  "aimsnuffle",
-  "sausagepeople",
-  "creditplums",
-  "substanceshortstop",
-  "adaptinterview",
-  "foresterdashiki",
-  "enjoinsoda",
-  "symbolinfamous",
-  "protectionthroughout",
-  "ornaterissoles",
-  "faultybouncy",
-  "commitmentgolfing",
-  "hangvirtue",
-  "basilalcohol",
-  "beanieacid",
-  "harlottrunks",
-  "unaffectedbroccoli",
-  "securityonly",
-  "parallelsupreme",
-  "scrapefew",
-  "codsever",
-  "fictionping",
-  "bothersqueak",
-  "uncutscenario",
-  "searchcapstan",
-  "oinkpeer",
-  "volunteerlingerie",
-  "catsluxuriant",
-  "candlefreedom",
-  "passengerlepe",
-  "peppersuncertain",
-  "latedodger",
-  "lutestringexcellent",
-  "honeycombregime",
-  "squatcornbread",
-  "haircutremnant",
-  "braziliandescent",
-  "sugarlost",
-  "plentyindiscreet",
-  "easterlytannenbaum",
-  "capitalistsrowing",
-  "keyboardtrounce",
-  "smokepaperweight",
-  "baneminent",
-  "picayuneproceed",
-  "passagekellogs",
-  "forddeclare",
-  "activitypies",
-  "skirtdirection",
-  "chargepalatable",
-  "walktiler",
-  "additionalcostume",
-  "carpenterincluding",
-  "graveluptight",
-  "fezhowl",
-  "motivatedouch",
-  "charityfuelpump",
-  "acrobatobvious",
-  "girlfriendbelted",
-  "avoidapron",
-  "steampatient",
-  "cheetahsapproach",
-  "tapiocagripping",
-  "waterskimoor",
-  "depressiontrainer",
-  "presencecardinal",
-  "snoozestemson",
-  "cheetahreading",
-  "chanceteenager",
-  "pickyadult",
-  "ibisweather",
-  "commandodwell",
-  "daffydecimal",
-  "daughternotice",
-  "irritateenglish",
-  "exposurefencer",
-  "imaginarytransfer",
-  "containhungry",
-  "forthbrisk",
-  "loyalspiffy",
-  "upsettube",
-  "decimalciabata",
-  "villagelimit",
-  "importedeloquence",
-  "shortcakewholesale",
-  "whooprough",
-  "cottonburp",
-  "hockeywreath",
-  "chimneysterling",
-  "parmesancajole",
-  "dependremaining",
-  "cowardicepeppermint",
-  "slowlydietician",
-  "wealthposition",
-  "ptarmiganscarefully",
-  "curiousskeletonizer",
-  "availableelement",
-  "heavenlysign",
-  "teachrecord",
-  "penitentwheel",
-  "plumberasparagus",
-  "strongyuletide",
-  "rewardingrefuse",
-  "earningskind",
-  "idioticruined",
-  "proudpolite",
-  "laveerpractice",
-  "corruptindication",
-  "hilarioustry",
-  "chiselsandals",
-  "urgedrunk",
-  "pillarheinz",
-  "zealmoment",
-  "contentfeathered",
-  "matchmakergodly",
-  "outfielderplate",
-  "tangibleinfield",
-  "ratespruce",
-  "shotputmoon",
-  "salmonshiss",
-  "subjectreserve",
-  "carrotassault",
-  "shamrockbasic",
-  "deeplyearly",
-  "ironcladdeveloper",
-  "elfintraffic",
-  "speciescommand",
-  "sexualhank",
-  "mediaconfront",
-  "mainsailsynonymous",
-  "projectorphantasmagoria",
-  "burlingtondramatic",
-  "droppershade",
-  "cricketintegrate",
-  "shroomlightgravity",
-  "heinzgabby",
-  "springdirt",
-  "mentallights",
-  "scoffmerry",
-  "burritowassail",
-  "growcover",
-  "murkysute",
-  "mohawkwilling",
-  "leashsupercargo",
-  "bricklayerprismarine",
-  "instancevacant",
-  "guidanceburlington",
-];
-
 let canvas;
 let ctx;
 let player1 = new Image();
@@ -429,7 +26,7 @@ let player2 = new Image();
 player2.src = "/player2.png";
 let explosion = new Image();
 explosion.src = "/explosion.png";
-let stage = "menu";
+let stage = "login";
 let game = {}; // sent by server
 let lastUpdate = Date.now();
 let socket;
@@ -454,7 +51,8 @@ let lobby_joined_section;
 let join_code;
 let username;
 let screens = {
-  menu: null,
+  login: null,
+  admin: null,
   lobby: null,
   game: null,
   end: null,
@@ -483,9 +81,10 @@ let button_lobby_name;
 let button_lobby_settings;
 let button_lobby_start;
 let button_lobby_settings_save;
-let end_new_game_btn;
-let end_menu_btn;
-let end_rematch_btn;
+let button_end_new_game;
+let button_end_menu;
+let button_end_rematch;
+let button_login;
 
 ///////////////
 
@@ -773,11 +372,18 @@ function draw() {
 function display_games(games) {
   const gamesList = document.getElementById("admin-games");
   gamesList.innerHTML = "";
-  for (const people of games) {
+  for (const people of Object.keys(games)) {
     for (let game_no = 0; game_no < games[people].length; game_no++) {
       const div = document.createElement("div");
-      div.innerHTML = `<span>${games[people][game_no].room}}</span><span>${people}_player</span><span>${games[people][game_no].state}</span>
-                <span>${games[people][game_no].players.length}</span><span>${games[people][game_no].frame}</span><span>payers alive</span>`;
+      div.className =
+        "grid grid-cols-6 gap-2 bg-gray-700 text-white p-2 rounded-lg shadow-md";
+      div.innerHTML = `
+        <span>${games[people][game_no].room}</span>
+        <span>${people}_player</span>
+        <span>${games[people][game_no].state}</span>
+        <span>${games[people][game_no].players.length}</span>
+        <span>${games[people][game_no].frame}</span>
+        <span>players alive</span>`;
       gamesList.appendChild(div);
     }
   }
@@ -786,12 +392,37 @@ function display_games(games) {
 function display_clients(clients) {
   const clientsList = document.getElementById("admin-clients");
   clientsList.innerHTML = "";
-  for (const client of clients) {
+  for (const client of Object.keys(clients)) {
     const div = document.createElement("div");
-    div.innerHTML = `<span>${client}</span><span>${clients[client].username}</span><span>${clients[client].status}</span
-            ><span>${clients[client].mode}</span>`;
+    div.className =
+      "grid grid-cols-4 gap-2 bg-gray-700 text-white p-2 rounded-lg shadow-md";
+    div.innerHTML = `
+      <span>${client}</span>
+      <span>${clients[client].username}</span>
+      <span>${clients[client].status}</span>
+      <span>${clients[client].mode}</span>`;
     clientsList.appendChild(div);
   }
+}
+
+function login() {
+  let login_username = document.getElementById("login-username").value;
+  let login_password = document.getElementById("login-password").value;
+  socket.emit("admin", {
+    operation: "login",
+    username: login_username,
+    password: login_password,
+  });
+}
+
+function live_check() {
+  if (stage == "admin") {
+    if (lastUpdate - Date.now() > 1000) {
+      // TODO add alert
+      setScreen("login");
+    }
+  }
+  setTimeout(live_check, 1000);
 }
 
 ///////////////
@@ -829,6 +460,16 @@ window.onload = function () {
     alert("disconnected"); // make it a custom alert (overlay)
     conected = false;
     disconected = true;
+  });
+
+  socket.on("login", (data) => {
+    if (data.complete) {
+      setScreen("admin");
+    } else {
+      document.getElementById("error-box").innerHTML =
+        "Invalid username or password";
+    }
+    document.getElementById("error-box").classList.remove("hidden");
   });
 
   socket.on("admin_update", (data) => {
@@ -964,7 +605,8 @@ window.onload = function () {
         break;
     }
   });
-
+  screens.login = document.getElementById("login");
+  screens.admin = document.getElementById("admin");
   screens.menu = document.getElementById("menu");
   screens.lobby = document.getElementById("lobby");
   screens.game = document.getElementById("game-screen");
@@ -1007,9 +649,13 @@ window.onload = function () {
 
   /////////////
 
-  end_new_game_btn = document.getElementById("end-new-game-btn");
-  end_menu_btn = document.getElementById("end-main-menu-btn");
-  end_rematch_btn = document.getElementById("end-rematch-btn");
+  button_end_new_game = document.getElementById("end-new-game-btn");
+  button_end_menu = document.getElementById("end-main-menu-btn");
+  button_end_rematch = document.getElementById("end-rematch-btn");
+
+  //////////////
+
+  button_login = document.getElementById("login-btn");
 
   //////////////
 
@@ -1036,11 +682,20 @@ window.onload = function () {
   //   load("join_lobby");
   // });
 
-  end_new_game_btn.addEventListener("click", () => {
+  button_end_new_game.addEventListener("click", () => {
     setScreen("menu");
     load(game_mode);
   });
-  end_menu_btn.addEventListener("click", () => {
+  button_end_menu.addEventListener("click", () => {
     setScreen("menu");
+  });
+
+  button_login.addEventListener("click", () => {
+    login();
+  });
+  document.getElementById("login-password").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      login();
+    }
   });
 };

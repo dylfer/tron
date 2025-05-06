@@ -29,13 +29,15 @@ import os
 import time
 import pygame
 import hashlib
+from dotenv import load_dotenv
 # use time to ajust the game clock for error in time
 
+load_dotenv()
 app = Flask(__name__,
             static_folder="web/static",
             template_folder="web/templates",
             static_url_path="")
-app.config['SECRET_KEY'] = 'secret!'
+app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
 CORS(app, resources={r"/*": {"origins": "*"}})
 socketio = SocketIO(app, cors_allowed_origins="*")
 
@@ -48,6 +50,12 @@ queues = {"2_player": [], "4_player": []}
 lobbies = {}  # lobbies, rooms, players and settings
 clock = pygame.time.Clock()
 badwords = []
+
+
+def hash(data):
+    secret_key = bytes(os.getenv("SECRET_KEY"), "utf-8")
+
+    return hashlib.pbkdf2_hmac('sha256', data.encode(), secret_key, 100000).hex()
 
 
 # game logic
@@ -330,8 +338,13 @@ def admin_kill_player():
 
 
 @app.route("/")
-def main():
+def main_page():
     return render_template("index.html")
+
+
+@app.route("/admin")
+def admin_page():
+    return render_template("admin.html")
 
 
 @socketio.on("connect")
@@ -487,10 +500,21 @@ def play(data):
 
 
 @socketio.on("admin")
-def admin(data):
+def admin_handler(data):
     match data["operation"]:
         case "login":
-            pass
+            if data["username"] == os.getenv("ADMIN_USERNAME") and hash(data["password"]) == os.getenv("ADMIN_PASSWORD"):
+                clients[request.sid].update(
+                    {"status": "admin", "username": data["username"]})
+                admin["id"] = request.sid
+                admin["username"] = data["username"]
+                admin["update"] = True
+                emit("login", {"complete": True,
+                               "games": games, "clients": clients}, to=admin["id"])
+                admin_update_loop()
+            else:
+                emit("login", {"complete": False,
+                               })
         case "view_game":
             # add admin to room
             pass

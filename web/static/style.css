@@ -1,0 +1,25 @@
+.placeholder-login {
+  position: absolute;
+  margin: 8px 0;
+  padding: 0 4px;
+  color: #6c757d;
+  display: flex;
+  align-items: center;
+  font-size: 1.4rem;
+  top: 0;
+  left: 14px;
+  transition: all 0.2s;
+  transform-origin: 0% 0%;
+  pointer-events: none;
+}
+
+.input-login:not(:placeholder-shown) + .placeholder-login,
+.input-login:focus + .placeholder-login {
+  transform: scale(0.8) translateY(-30px);
+}
+
+.input-login {
+  font-size: 1.4rem;
+  color: #495055;
+  outline: none;
+}

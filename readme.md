@@ -32,8 +32,8 @@ python
 - [ ] save games?
 - [ ] replay games?
 - [ ] accounts?
-- [ ] add admin dashboard 
-- [ ] add usernames
+- [x] add admin dashboard 
+- [x] add usernames
 - [ ] add 10 second wait after 2+payers join 4 player que so 4 can join  
 - [ ] fix game number removal index list 
 
@@ -54,15 +54,16 @@ javascript
 - [ ] accounts?
 - [ ] fix incorrect first direction action (conditional)
 - [ ] opponent bike orientation ?
-- [ ] admin page and logic 
-- [ ] add usernames
+- [x] admin page and logic 
+- [x] add usernames
 - [ ] add countdown to start in matching for 4 player 
 - [ ] add tips on loading
 
 Admin
- - [ ] login
- - [ ] view games and data 
- - [ ] view conected clients
+ - [x] login
+ - [x] view games and data 
+ - [x] view conected clients
  - [ ] live view game and leave button
+ - [ ] kill players and end games
 
 NOTE: this has only been used for personal use. i dont own the images used in this project, use them at your own risk, thy are not part of this license suplied with this project
