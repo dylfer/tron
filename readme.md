@@ -63,7 +63,8 @@ Admin
  - [x] login
  - [x] view games and data 
  - [x] view conected clients
- - [ ] live view game and leave button
+ - [x] live view game and leave button
  - [ ] kill players and end games
+ - [ ] complete view games features
 
 NOTE: this has only been used for personal use. i dont own the images used in this project, use them at your own risk, thy are not part of this license suplied with this project

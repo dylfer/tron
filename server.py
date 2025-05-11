@@ -30,7 +30,6 @@ import time
 import pygame
 import hashlib
 from dotenv import load_dotenv
-# use time to ajust the game clock for error in time
 
 
 # ////////////////
@@ -52,7 +51,7 @@ def hash(data):
 def Define(app):
     socketio = SocketIO(app, cors_allowed_origins="*")
 
-    admin = {"id": "", "username": "", "update": False}
+    admin = {"id": "", "username": "", "update": False, "update_frame": 0}
     clients = {}
     games = {2: [], 4: []}  # active games and players
     # game modes just to keep pleayer count
@@ -313,15 +312,22 @@ def Define(app):
         # TODO add score and rematch logic
 
     def admin_update_loop():
+        if admin["update"]:
+            return
+        admin["update"] = True
         while True:
             if admin["update"]:
-                emit("admin_update", {"operation": "update",
+                emit("admin_update", {"operation": "update", "frame": admin["update_frame"],
                                       "games": games, "clients": clients}, to=admin["id"])
             time.sleep(0.1)
 
-    def admin_view_game(game_name):  # from game or folow player
+    def admin_view_game(game_room):  # from game or folow player
+        if game_room not in [game["room"] for games_list in games.values() for game in games_list]:
+            emit("admin", {"operation": "error",
+                 "error": "game not found"}, to=admin["id"])
+            return
         admin["update"] = False
-        join_room(game_name, admin["id"])
+        join_room(game_room, admin["id"])
 
     def admin_end_game():
         pass  # end game with reason admin
@@ -490,29 +496,33 @@ def Define(app):
 
     @socketio.on("admin")
     def admin_handler(data):
-        match data["operation"]:
-            case "login":
-                if data["username"] == os.getenv("ADMIN_USERNAME") and hash(data["password"]) == os.getenv("ADMIN_PASSWORD"):
-                    clients[request.sid].update(
-                        {"status": "admin", "username": data["username"]})
-                    admin["id"] = request.sid
-                    admin["username"] = data["username"]
-                    admin["update"] = True
-                    emit("login", {"complete": True,
-                                   "games": games, "clients": clients}, to=admin["id"])
-                    admin_update_loop()
-                else:
-                    emit("login", {"complete": False,
-                                   })
-            case "view_game":
-                # add admin to room
-                pass
-            case "end_game":
-                # end game with reason admin
-                pass
-            case "kill_player":
-                # kill player with reason admin
-                pass
+        if data["operation"] == "login":
+            if data["username"] == os.getenv("ADMIN_USERNAME") and hash(data["password"]) == os.getenv("ADMIN_PASSWORD"):
+                clients[request.sid].update(
+                    {"status": "admin", "username": data["username"]})
+                admin["id"] = request.sid
+                admin["username"] = data["username"]
+                emit("login", {"complete": True,
+                               "games": games, "clients": clients}, to=admin["id"])
+                admin_update_loop()
+            else:
+                emit("login", {"complete": False,
+                               })
+        else:
+            if request.sid != admin["id"]:
+                emit("error", {"operation": "not admin"})
+                return
+            match data["operation"]:
+                case "view_game":
+                    admin_view_game(data["game_room"])
+                case "view_player":
+                    pass
+                case "end_game":
+                    # end game with reason admin
+                    pass
+                case "kill_player":
+                    # kill player with reason admin
+                    pass
 
     @socketio.on("disconnect")
     def disconnected():

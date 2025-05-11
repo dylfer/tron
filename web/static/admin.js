@@ -371,20 +371,50 @@ function draw() {
 
 function display_games(games) {
   const gamesList = document.getElementById("admin-games");
-  gamesList.innerHTML = "";
+  const existingGames = new Set();
+  for (const div of gamesList.children) {
+    existingGames.add(div.dataset.room);
+  }
+
   for (const people of Object.keys(games)) {
     for (let game_no = 0; game_no < games[people].length; game_no++) {
-      const div = document.createElement("div");
-      div.className =
-        "grid grid-cols-6 gap-2 bg-gray-700 text-white p-2 rounded-lg shadow-md";
-      div.innerHTML = `
-        <span>${games[people][game_no].room}</span>
-        <span>${people}_player</span>
-        <span>${games[people][game_no].state}</span>
-        <span>${games[people][game_no].players.length}</span>
-        <span>${games[people][game_no].frame}</span>
-        <span>players alive</span>`;
-      gamesList.appendChild(div);
+      const gameRoom = games[people][game_no].room;
+
+      if (!existingGames.has(gameRoom)) {
+        const div = document.createElement("div");
+        div.className =
+          "grid grid-cols-6 gap-2 bg-gray-700 text-white p-2 rounded-lg shadow-md";
+        div.dataset.room = gameRoom;
+        div.innerHTML = `
+          <span>${gameRoom}</span>
+          <span>${people}_player</span>
+          <span>${games[people][game_no].state}</span>
+          <span>${games[people][game_no].players.length}</span>
+          <span>${games[people][game_no].frame}</span>
+          <span>players alive</span>`;
+        const viewButton = document.createElement("button");
+        viewButton.className =
+          "bg-blue-500 hover:bg-blue-600 text-white font-bold py-1 px-2 rounded";
+        viewButton.innerText = "View";
+        viewButton.addEventListener("click", () => {
+          socket.emit("admin", {
+            operation: "view_game",
+            game_room: gameRoom,
+          });
+          setScreen("game");
+        });
+        div.appendChild(viewButton);
+        gamesList.appendChild(div);
+      } else {
+        existingGames.delete(gameRoom);
+      }
+    }
+  }
+
+  for (const room of existingGames) {
+    const divToRemove = gamesList.querySelector(`[data-room="${room}"]`);
+    if (divToRemove) {
+      gamesList.removeChild(divToRemove);
     }
   }
 }
@@ -392,16 +422,41 @@ function display_games(games) {
 function display_clients(clients) {
   const clientsList = document.getElementById("admin-clients");
   clientsList.innerHTML = "";
+  const existingClients = new Set();
+  for (const div of clientsList.children) {
+    existingClients.add(div.dataset.client);
+  }
+
   for (const client of Object.keys(clients)) {
-    const div = document.createElement("div");
-    div.className =
-      "grid grid-cols-4 gap-2 bg-gray-700 text-white p-2 rounded-lg shadow-md";
-    div.innerHTML = `
-      <span>${client}</span>
-      <span>${clients[client].username}</span>
-      <span>${clients[client].status}</span>
-      <span>${clients[client].mode}</span>`;
-    clientsList.appendChild(div);
+    if (!existingClients.has(client)) {
+      const div = document.createElement("div");
+      div.className =
+        "grid grid-cols-4 gap-2 bg-gray-700 text-white p-2 rounded-lg shadow-md";
+      div.dataset.client = client;
+      div.innerHTML = `
+        <span>${client}</span>
+        <span>${clients[client].username}</span>
+        <span>${clients[client].status}</span>
+        <span>${clients[client].mode}</span>`;
+      const viewButton = document.createElement("button");
+      viewButton.className =
+        "bg-blue-500 hover:bg-blue-600 text-white font-bold py-1 px-2 rounded";
+      viewButton.innerText = "Follow";
+      viewButton.addEventListener("click", () => {
+        // TODO emit follow client
+      });
+      div.appendChild(viewButton);
+      clientsList.appendChild(div);
+    } else {
+      existingClients.delete(client);
+    }
+  }
+
+  for (const client of existingClients) {
+    const divToRemove = clientsList.querySelector(`[data-client="${client}"]`);
+    if (divToRemove) {
+      clientsList.removeChild(divToRemove);
+    }
   }
 }
 
