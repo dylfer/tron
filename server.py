@@ -29,6 +29,7 @@ import os
 import time
 import pygame
 import hashlib
+import asyncio
 from dotenv import load_dotenv
 
 
@@ -260,20 +261,7 @@ def Define(app):
             queues[f"{players}_player"].append(sid)
             return 0, "waiting for players"
 
-    def start(people, game_no):  # count down then start game
-        for i in range(5):
-            emit("starting", {"operation": f"starting {5-i}"},
-                 to=f"{people}_player_game_{str(game_no)}")
-            time.sleep(1)
-        emit("start", {"operation": "4"},
-             to=f"{people}_player_game_{str(game_no)}")
-        time.sleep(1)
-        for i in range(3):
-            emit("start", {"operation": f"{3-i}"},
-                 to=f"{people}_player_game_{str(game_no)}")
-            time.sleep(1)
-        emit("start", {"operation": "0"},
-             to=f"{people}_player_game_{str(game_no)}")
+    async def prepare_game(people, game_no):
         # TODO set starting cordonates
         i = 0
         cords = generate_coordinates(people)
@@ -285,6 +273,23 @@ def Define(app):
             games[people][game_no-1]["players"][player].update(
                 {"direction": cords[i][1]})
             i += 1
+
+    def start(people, game_no):  # count down then start game
+        for i in range(5):
+            emit("starting", {"operation": f"starting {5-i}"},
+                 to=f"{people}_player_game_{str(game_no)}")
+            time.sleep(1)
+        # TODO players should be able to still join untill here
+        emit("start", {"operation": "4"},
+             to=f"{people}_player_game_{str(game_no)}")
+        asyncio.run(prepare_game(people, game_no))
+        time.sleep(1)
+        for i in range(3):
+            emit("start", {"operation": f"{3-i}", "data": games[people][game_no-1]["players"]},
+                 to=f"{people}_player_game_{str(game_no)}")
+            time.sleep(1)
+        emit("start", {"operation": "0", "data": games[people][game_no-1]["players"]},
+             to=f"{people}_player_game_{str(game_no)}")
 
         games[people][game_no-1].update({"state": "running"})
         loop_run(people, game_no, 0)

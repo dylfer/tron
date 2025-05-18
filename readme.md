@@ -66,5 +66,6 @@ Admin
  - [x] live view game and leave button
  - [ ] kill players and end games
  - [ ] complete view games features
+ - [ ] send messages
 
 NOTE: this has only been used for personal use. i dont own the images used in this project, use them at your own risk, thy are not part of this license suplied with this project

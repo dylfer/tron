@@ -768,6 +768,24 @@ function draw() {
   }
 }
 
+function setUsernames() {
+  side = 0;
+  if (Object.keys(game)[0] != socket.id) {
+    side = 1;
+  }
+  document.getElementById("game-left-names").innerHTML = "";
+  document.getElementById("game-right-names").innerHTML = "";
+  for (let i = 0; i < Object.keys(game).length; i++) {
+    if (i % 2 == side) {
+      document.getElementById("game-left-names").innerHTML +=
+        game[Object.keys(game)[i]].username;
+    } else {
+      document.getElementById("game-right-names").innerHTML +=
+        game[Object.keys(game)[i]].username;
+    }
+  }
+}
+
 ///////////////
 
 window.onload = function () {
@@ -883,6 +901,12 @@ window.onload = function () {
         showConfirmButton: false,
         timer: 900,
       });
+      if (data.operation != "4") {
+        game = data.data;
+        lastUpdate = Date.now();
+        update();
+        setUsernames();
+      }
     }
     // alert(`starting in ${data.secconds}`); // make it a custom alert (overlay)
   });

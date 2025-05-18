@@ -203,10 +203,15 @@
       <h1 class="text-3xl" id="starting-info"></h1>
     </div>
     <div
-      class="hidden flex justify-center items-center h-screen w-screen"
+      class="hidden flex flex-col justify-center items-center h-screen w-screen"
       id="game-screen"
       tabindex="-1"
     >
+      <div class="flex justify-between w-[1500px] p-4">
+        <span id="game-left-names">test</span>
+        <span>vs</span>
+        <span id="game-right-names">test</span>
+      </div>
       <canvas class="h-[800px] w-[1500px] border-2 border-white" id="game">
       </canvas>
     </div>
