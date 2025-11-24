@@ -18,7 +18,7 @@ python
 - [ ] make sure sid is not the same as other player (refrech page)
 - [x] fix player line collision
 - [ ] fix bike icon collision
-- [ ] fix disconnect sid errors
+- [x] fix disconnect sid errors
 - [ ] fix game que sid errors 
 - [ ] fix game matching errors
 - [x] add the game loop
@@ -35,7 +35,9 @@ python
 - [x] add admin dashboard 
 - [x] add usernames
 - [ ] add 10 second wait after 2+payers join 4 player que so 4 can join  
-- [ ] fix game number removal index list 
+- [ ] fix game number removal index list to dict change itration 
+- [ ] fix any player disconect other players freeze game and conect in console but never disconect?? just local testing or system problem 
+- [ ] remove uneasy data from admin view update like trails
 
 javascript
 - [ ] alert overlay (use sweetalert2)
@@ -47,17 +49,21 @@ javascript
 - [ ] add  flipped view 
 - [x] add bike rotation
 - [ ] fix trails. are trails broken???
+- [ ] fix bike image direction
 - [ ] leaderboard
 - [ ] single player
 - [ ] local 2 player
 - [ ] replay games?
 - [ ] accounts?
 - [ ] fix incorrect first direction action (conditional)
-- [ ] opponent bike orientation ?
 - [x] admin page and logic 
 - [x] add usernames
 - [ ] add countdown to start in matching for 4 player 
 - [ ] add tips on loading
+- [ ] fix any player disconect other players freeze game and conect in console but never disconect?? just local testing or system problem 
+- [ ] local multi player 
+- [ ] ai 1 player
+- [ ] lobby
 
 Admin
  - [x] login
@@ -66,6 +72,7 @@ Admin
  - [x] live view game and leave button
  - [ ] kill players and end games
  - [ ] complete view games features
- - [ ] send messages
+ - [ ] send messages to games or players
+ - [ ] fix admin details display update (frame)
 
 NOTE: this has only been used for personal use. i dont own the images used in this project, use them at your own risk, thy are not part of this license suplied with this project

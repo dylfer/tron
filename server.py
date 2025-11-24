@@ -325,6 +325,7 @@ def Define(app):
                 emit("admin_update", {"operation": "update", "frame": admin["update_frame"],
                                       "games": games, "clients": clients}, to=admin["id"])
             time.sleep(0.1)
+            admin["update_frame"] += 1
 
     def admin_view_game(game_room):  # from game or folow player
         if game_room not in [game["room"] for games_list in games.values() for game in games_list]:
@@ -355,7 +356,8 @@ def Define(app):
         """event listener for when client connects to the server"""
         # print(request.sid)
         print(f"client {request.sid} has connected")
-        clients.update({request.sid: {"status": "menu"}})
+        clients.update(
+            {request.sid: {"status": "menu", "username": "undefined"}})
         # emit("connect", {"data": f"id: {request.sid} is connected"})
 
     @socketio.on('game_update')
@@ -532,7 +534,7 @@ def Define(app):
     @socketio.on("disconnect")
     def disconnected():
         """event listener for when client disconnects to the server"""
-        del clients[request.sid]
+
         for mode in modes:
             if request.sid in modes[mode]:
                 modes[mode].remove(request.sid)
@@ -540,12 +542,15 @@ def Define(app):
             if request.sid in queues[queue]:
                 queues[queue].remove(request.sid)
         for players in games:
-            for g in games[players]["players"]:
-                if request.sid in games[players][g]["players"].keys():
+            # TODO game index iteration
+            for i in range(len(games[players])):
+                if request.sid in games[players][i]["players"].keys():
                     # send player disconect request
-                    del games[players][g]["players"][request.sid]
+                    del games[players][i]["players"][request.sid]
         print("user disconnected")
-        emit("disconnect", f"user {request.sid} disconnected", broadcast=True)
+        emit("disconnect", {
+             "message": f"user '{clients[request.sid]["username"]}' disconnected", "user_id": request.sid}, broadcast=True)
+        del clients[request.sid]
 
     def recived():
         pass
