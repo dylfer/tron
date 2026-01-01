@@ -8,6 +8,22 @@ install requirements
 run server.py using python
 ```python3 server.py```
 
+## deployment - build
+replace 1 with the curent version
+docker build -t game_tron_1 .
+to upload to portainer 
+docker save -o game_tron_1.tar game_tron_1
+or to runn 
+docker run -d -p 80:80 game_tron_1
+
+## env
+### required
+- ADMIN_USERNAME - admin user name
+- ADMIN_PASSWORD - admin passowrd hash
+- SECRET_KEY - for the server
+### optional
+- PORT - 80
+
 
 ## TODO
  - [x] add licence 
