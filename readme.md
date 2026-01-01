@@ -9,12 +9,12 @@ run server.py using python
 ```python3 server.py```
 
 ## deployment - build
-replace 1 with the curent version
-docker build -t game_tron_1 .
+update the version
+docker build -t game_tron:v1.1 .
 to upload to portainer 
-docker save -o game_tron_1.tar game_tron_1
-or to runn 
-docker run -d -p 80:80 game_tron_1
+docker save -o game_tron_v1.tar game_tron:v1.1
+or to run
+docker run -d -p 80:80 game_tron:v1.1
 
 ## env
 ### required
@@ -28,6 +28,7 @@ docker run -d -p 80:80 game_tron_1
 ## TODO
  - [x] add licence 
  - [ ] images - leagal ??
+ - [ ] ## setup production server ##
 
 python
 - [ ] check if a game is being prepared and can alow for more to join (4 player)
