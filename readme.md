@@ -55,6 +55,7 @@ python
 - [ ] fix game number removal index list to dict change itration 
 - [ ] fix any player disconect other players freeze game and conect in console but never disconect?? just local testing or system problem 
 - [ ] remove uneasy data from admin view update like trails
+- [ ] clean up
 
 javascript
 - [ ] alert overlay (use sweetalert2)
@@ -81,6 +82,7 @@ javascript
 - [ ] local multi player 
 - [ ] ai 1 player
 - [ ] lobby
+- [ ] clean up 
 
 Admin
  - [x] login
@@ -91,5 +93,7 @@ Admin
  - [ ] complete view games features
  - [ ] send messages to games or players
  - [ ] fix admin details display update (frame)
+ - [ ] clean up
+ - [ ] on build no admin setup 
 
 NOTE: this has only been used for personal use. i dont own the images used in this project, use them at your own risk, thy are not part of this license suplied with this project
