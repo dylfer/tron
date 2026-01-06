@@ -88,6 +88,27 @@ let button_login;
 
 ///////////////
 
+function router() {
+  return new Promise((resolve, reject) => {
+    console.log("test");
+    let xhr = new XMLHttpRequest();
+    xhr.open("GET", "/router", true);
+    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === 4 && xhr.status === 200) {
+        let response = JSON.parse(xhr.responseText);
+        if (response.msg == "yes") {
+          window.route = response.route;
+        }
+        resolve("yes");
+      } else if (xhr.readyState === 4) {
+        resolve("no");
+      }
+    };
+    xhr.send();
+  });
+}
+
 function setScreen(screen) {
   screens[stage].classList.add("hidden");
   screens[screen].classList.remove("hidden");
@@ -500,17 +521,28 @@ function setUsernames() {
 
 ///////////////
 
-window.onload = function () {
+window.onload = async function () {
+  await router();
+  if (window.route) {
+    player1.src = `/${window.route}/player1.png`;
+    player2.src = `/${window.route}/player2.png`;
+    explosion.src = `/${window.route}/explosion.png`;
+  }
   document.getElementById("username").value = "admin";
   canvas = document.getElementById("game");
   canvas.width = 1500;
   canvas.height = 800;
   ctx = canvas.getContext("2d");
   ctx.drawImage(canvas, 0, 0);
-
-  socket = io(window.location.host + "/", {
-    transports: ["websocket", "polling", "flashsocket"],
-  });
+  if (window.route) {
+    ket = io(window.location.host + `/${window.route}/`, {
+      transports: ["websocket", "polling", "flashsocket"],
+    });
+  } else {
+    socket = io(window.location.host + "/", {
+      transports: ["websocket", "polling", "flashsocket"],
+    });
+  }
 
   socket.on("connect", () => {
     console.log("connected");
